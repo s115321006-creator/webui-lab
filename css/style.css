@@ -1,0 +1,569 @@
+/* ======================================================================
+   style.css — 這個檔案負責整個網頁的「外觀」：顏色、間距、字體、版面排列。
+   HTML 檔案（index.html）只負責「內容結構」，實際長怎樣都寫在這裡，
+   這樣以後要改配色或排版，只需要改這一個檔案，不用去動 HTML 的內容。
+   ====================================================================== */
+
+/* ---------- 顏色變數（CSS Custom Properties） ----------
+   :root 代表「整份文件的最外層」。
+   在這裡用 --xxx 定義的變數，之後整個 CSS 都可以用 var(--xxx) 取用，
+   好處是：以後想換主題色，只要改這幾行，不用整份 CSS 一個一個找顏色改。
+*/
+:root {
+  --bg: #eef4ea;    /* 網頁背景色（淺綠） */
+  --card: #fff;     /* 卡片／區塊的背景色（白色） */
+  --ink: #1f2a24;   /* 主要文字顏色（深綠黑） */
+  --sub: #5d6b62;   /* 次要／說明文字顏色（灰綠） */
+  --line: #d5ded1;  /* 邊框、分隔線顏色 */
+  --red: #e23d2e;   /* 強調色（例如「轉！」「開始轉」等主要按鈕） */
+  --yel: #f5b82e;   /* 黃色（星星評分、提示框邊框、鍵盤聚焦外框） */
+  --grn: #2f9e5b;   /* 綠色（一般餐廳標記、已選中的篩選條件、好評標籤） */
+  --pur: #6b4fa0;   /* 紫色（收藏標記、自訂、AI 摘要標籤） */
+  --blu: #2f6fa0;   /* 藍色（地圖上「你的位置」標記） */
+
+  /* box-sizing: border-box 讓「寬度／高度」的計算方式包含 padding 和 border，
+     這樣設定 width:100% 不會因為多了內距而爆版，是現代網頁開發的標準寫法。 */
+  box-sizing: border-box;
+
+  /* 下面兩行是「安全區域」設定，專門處理手機瀏海、底部手勢列：
+     env(safe-area-inset-top/bottom, 0px) 會自動取得「螢幕不能被遮住的安全距離」，
+     沒有瀏海的裝置（例如一般電腦）則會是 0px，不會有影響。 */
+  padding-top: env(safe-area-inset-top, 0px);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* ---------- 深色模式（Dark Mode） ----------
+   如果使用者的系統設定是「深色模式」，瀏覽器會自動套用下面這段，
+   重新定義一組顏色變數，整個網頁的顏色就會自動換成深色版本，
+   不需要另外寫一份 HTML 或 JavaScript 判斷。 */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #15201a;
+    --card: #1f2c25;
+    --ink: #eef4ea;
+    --sub: #9fb0a5;
+    --line: #33443a;
+  }
+}
+/* 如果網頁本身有手動指定 data-theme="dark"（例如使用者自己切換），也套用深色配色 */
+:root[data-theme="dark"] {
+  --bg: #15201a;
+  --card: #1f2c25;
+  --ink: #eef4ea;
+  --sub: #9fb0a5;
+  --line: #33443a;
+}
+
+html {
+  /* 捲動到某個區塊時，預留安全區域的距離，避免被瀏海擋住 */
+  scroll-padding-top: env(safe-area-inset-top, 0px);
+}
+
+* {
+  /* 萬用選擇器 *：讓「所有」HTML 元素都套用 border-box 的寬高計算方式 */
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0; /* 瀏覽器預設 body 會有一點外距，先歸零，自己控制版面 */
+  background: var(--bg);
+  color: var(--ink);
+  font-family: "Noto Sans TC", "PingFang TC", "Microsoft JhengHei", sans-serif;
+  /* 字型會按順序嘗試：先用思源黑體，沒有的話用蘋果系統中文字型，
+     再沒有就用微軟正黑體，都沒有才用系統預設的無襯線字體 */
+  line-height: 1.6; /* 行高，讓文字不會擠在一起，方便閱讀 */
+}
+
+/* ---------- 版面容器 #app ---------- */
+#app {
+  max-width: 460px;   /* 預設限制成手機畫面的寬度，整個 App 看起來像手機 App */
+  margin: 0 auto;      /* 水平置中 */
+  padding: 16px 18px 40px;
+  min-height: 100vh;   /* 至少跟螢幕一樣高 */
+  transition: max-width .15s; /* 寬度改變時加一點點動畫過渡，不會跳得很突兀 */
+}
+#app.wide {
+  /* 當 JavaScript 幫 #app 加上 "wide" 這個 class 時（進入餐廳結果頁時會這樣做），
+     容器變寬，讓「清單 + 地圖」雙欄版面有足夠空間顯示 */
+  max-width: 1040px;
+}
+
+/* ---------- 畫面切換機制 ---------- */
+.scr {
+  display: none; /* 預設把每個畫面（section.scr）都藏起來 */
+}
+.scr.on {
+  display: block; /* 只有被加上 "on" 這個 class 的畫面才會顯示，由 JS 控制 */
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.top h2 {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+h1 {
+  font-size: 34px;
+  font-weight: 900;
+  margin: 40px 0 4px;
+}
+p.sub {
+  color: var(--sub);
+  margin: 0 0 20px;
+}
+
+/* ---------- 按鈕 ---------- */
+button, .btn {
+  font: inherit;            /* 繼承父層的字型設定，按鈕文字才會跟全站一致 */
+  font-weight: 700;
+  border: 0;
+  border-radius: 12px;
+  padding: 12px 18px;
+  cursor: pointer;
+  background: var(--ink);
+  color: var(--bg);
+  text-decoration: none;    /* 如果是 <a> 做成按鈕樣式，拿掉底線 */
+  display: inline-block;
+  min-height: 44px;         /* 44px 是行動裝置建議的「最小可點擊範圍」，方便手指點擊 */
+}
+button.alt, .btn.alt {
+  /* 「次要」樣式按鈕：透明底、深色外框，用在不是主要動作的按鈕上 */
+  background: transparent;
+  color: var(--ink);
+  border: 2px solid var(--ink);
+}
+button.go {
+  /* 「主要行動」樣式按鈕：紅色底，用在「轉！」「開始轉」這種最重要的動作上 */
+  background: var(--red);
+  color: #fff;
+}
+button.blk {
+  display: block;
+  width: 100%;
+  margin-bottom: 10px;
+}
+button:disabled {
+  opacity: .4;
+  cursor: default;
+}
+button:focus-visible, .btn:focus-visible, input:focus-visible, select:focus-visible {
+  /* :focus-visible 只有在「用鍵盤 Tab 切換焦點」時才會顯示外框，
+     滑鼠點擊不會出現，兼顧美觀與無障礙（鍵盤使用者看得到焦點在哪） */
+  outline: 3px solid var(--yel);
+  outline-offset: 2px;
+}
+.back {
+  padding: 8px 14px;
+  min-height: 40px;
+}
+
+/* ---------- 卡片容器 ---------- */
+.card {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+  margin-bottom: 14px;
+}
+.card h3 {
+  margin: 0 0 8px;
+  font-size: 15px;
+}
+
+/* ---------- 篩選用的藥丸狀按鈕（chip） ---------- */
+.chip {
+  display: inline-block;
+  padding: 7px 14px;
+  border-radius: 99px;     /* 數字很大，讓方塊直接變成膠囊／藥丸形狀 */
+  border: 1.5px solid var(--line);
+  background: transparent;
+  color: var(--ink);
+  font-size: 14px;
+  margin: 0 6px 6px 0;
+  min-height: 36px;
+  font-weight: 500;
+}
+.chip.on {
+  /* 被選中的篩選條件，JS 會幫它加上 "on" 這個 class */
+  background: var(--grn);
+  border-color: var(--grn);
+  color: #fff;
+}
+
+/* ---------- 表單元件 ---------- */
+input, select {
+  font: inherit;
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1.5px solid var(--line);
+  background: var(--bg);
+  color: var(--ink);
+  margin-bottom: 8px;
+}
+.two {
+  display: flex;
+  gap: 8px;
+}
+.two select {
+  margin-bottom: 8px;
+}
+
+/* ---------- 轉盤 ---------- */
+.wb {
+  width: min(360px, 86vw);
+  /* min()：取「360px」跟「螢幕寬度的86%」兩者中比較小的那個，
+     螢幕很窄的手機也不會讓轉盤超出畫面 */
+  margin: 0 auto;
+  display: block;
+}
+#rot {
+  transform-origin: 0 0; /* 旋轉的中心點設在 SVG 座標的 (0,0)，也就是轉盤圓心 */
+  transition: transform 4.2s cubic-bezier(.12, .6, .1, 1);
+  /* 旋轉動畫：4.2 秒、自訂的速度曲線（一開始快、後面慢慢減速停下來，模擬真實轉盤） */
+}
+.res {
+  text-align: center;
+  font-size: 36px;
+  font-weight: 900;
+  min-height: 56px;
+  margin: 6px 0;
+}
+.row {
+  display: flex;
+  gap: 10px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+/* ---------- 清單項目（餐廳、收藏、黑名單共用） ---------- */
+.item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 8px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--line);
+  scroll-margin-top: 16px; /* 搭配 scrollIntoView()，捲動定位時上方留一點空間 */
+  border-radius: 8px;
+}
+.item:last-child {
+  border-bottom: 0; /* 最後一筆資料不要畫下底線 */
+}
+.item.sel {
+  /* 在地圖上點選某家餐廳時，對應的清單項目會被加上 "sel"，用外框標示出來 */
+  outline: 2px solid var(--pur);
+  outline-offset: 4px;
+}
+.item small {
+  color: var(--sub);
+  display: block;
+}
+.tag {
+  font-size: 11px;
+  background: var(--pur);
+  color: #fff;
+  border-radius: 6px;
+  padding: 1px 7px;
+  margin-left: 6px;
+}
+.tag.v {
+  background: var(--grn); /* 「素食」標籤用綠色，跟「自訂」標籤（紫色）做區分 */
+}
+.ib {
+  /* icon button：只有圖示、沒有外框背景的小按鈕（♡、⊘ 這種） */
+  background: none;
+  color: var(--ink);
+  padding: 6px 10px;
+  min-width: 44px;
+  font-size: 18px;
+}
+.empty {
+  color: var(--sub);
+  text-align: center;
+  padding: 24px 8px;
+}
+
+/* ---------- 浮動提示訊息（toast） ---------- */
+#toast {
+  position: fixed;           /* 固定在螢幕上，不會隨內容捲動 */
+  left: 50%;
+  bottom: calc(24px + env(safe-area-inset-bottom, 0px));
+  transform: translateX(-50%); /* 搭配 left:50%，讓元素真正「水平置中」 */
+  background: var(--ink);
+  color: var(--bg);
+  padding: 10px 18px;
+  border-radius: 99px;
+  font-size: 14px;
+  opacity: 0;                 /* 預設透明（看不到） */
+  transition: opacity .25s;   /* 淡入淡出動畫 */
+  pointer-events: none;       /* 滑鼠事件直接穿透，不會擋到下面的按鈕 */
+  z-index: 9;                 /* 疊在其他內容的上層 */
+  max-width: 90vw;
+  text-align: center;
+}
+#toast.on {
+  opacity: 1; /* JS 顯示提示訊息時，會幫它加上 "on"，透明度變成 1（完全顯示） */
+}
+
+.note {
+  color: var(--sub);
+  font-size: 12px;
+  text-align: center;
+  margin-top: 16px;
+}
+.hint {
+  color: var(--sub);
+  font-size: 13px;
+  margin: 6px 0 0;
+}
+label.ck {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin: 4px 0 10px;
+  font-size: 14px;
+}
+label.ck input {
+  width: auto;
+  margin: 0;
+}
+
+/* ---------- 範圍防呆提示框 ---------- */
+.banner {
+  background: #fff7e0;
+  border: 1.5px solid var(--yel);
+  border-radius: 14px;
+  padding: 12px 14px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+@media (prefers-color-scheme: dark) {
+  .banner { background: #3a3416; border-color: #7a6a1e; }
+}
+:root[data-theme="dark"] .banner {
+  background: #3a3416;
+  border-color: #7a6a1e;
+}
+.banner b {
+  display: block;
+  margin-bottom: 4px;
+  font-size: 14px;
+}
+.times {
+  display: flex;
+  gap: 14px;
+  margin-top: 6px;
+  color: var(--sub);
+  flex-wrap: wrap;
+}
+
+/* ======================================================================
+   餐廳結果頁：清單 + 地圖 雙欄版面
+   ====================================================================== */
+.resultLayout {
+  display: flex;
+  gap: 18px;
+  align-items: flex-start;
+}
+.listCol {
+  flex: 1;       /* 清單欄位會自動把剩下的空間都佔滿 */
+  min-width: 0;  /* flex 版面常見的保險寫法，避免內容過長時把版面撐爆 */
+}
+.mapCol {
+  width: 320px;
+  flex-shrink: 0;  /* 螢幕變窄時，地圖欄位的寬度不會被擠壓縮小 */
+  position: sticky; /* 清單捲動時，地圖欄位會「黏」在畫面上，固定不動 */
+  top: 16px;
+}
+.mapCard {
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 16px;
+}
+.mapCard h3 {
+  margin: 0 0 8px;
+  font-size: 14px;
+}
+.mapSvgWrap {
+  border-radius: 14px;
+  overflow: hidden;
+  background: var(--bg);
+}
+.mapDetail {
+  margin-top: 10px;
+  padding: 10px 12px;
+  border: 1.5px solid var(--pur);
+  border-radius: 12px;
+  font-size: 13px;
+}
+.mapDetail .drow {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.mapDetail .drow button {
+  padding: 8px 12px;
+  min-height: 36px;
+}
+
+/* 地圖上的標記點 */
+.pin {
+  cursor: pointer;
+}
+.pin .dot {
+  transition: r .15s, stroke-width .15s; /* 被選中時，圓點放大、外框變粗的過渡動畫 */
+}
+.pin:hover .dot, .pin.sel .dot {
+  stroke: var(--ink);
+  stroke-width: 2.5;
+}
+.originPulse {
+  animation: pulse 1.8s ease-out infinite; /* 「你的位置」那個藍點外圍的脈動光暈動畫 */
+}
+@keyframes pulse {
+  0%   { r: 7;  stroke-opacity: .6; }
+  100% { r: 26; stroke-opacity: 0;  }
+}
+
+/* 手機版才會出現的「查看地圖」按鈕，預設先藏起來 */
+.mapPeekBtn {
+  display: none;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+/* 全螢幕地圖彈窗 */
+.mapOverlay {
+  position: fixed;
+  inset: 0;           /* 等同 top:0; right:0; bottom:0; left:0;，蓋滿整個視窗 */
+  background: var(--bg);
+  z-index: 30;
+  overflow: auto;
+  display: none;
+}
+.mapOverlay.on {
+  display: block; /* JS 加上 "on" 這個 class 時才顯示全螢幕地圖 */
+}
+.mapOverlayInner {
+  max-width: 520px;
+  margin: 0 auto;
+  padding: 16px 18px calc(24px + env(safe-area-inset-bottom, 0px));
+}
+
+/* ---------- RWD 響應式斷點：螢幕寬度 ≤ 820px（手機、小平板） ---------- */
+@media (max-width: 820px) {
+  .resultLayout {
+    flex-direction: column; /* 雙欄改成上下排列（雖然地圖欄位接下來會被整個隱藏） */
+  }
+  .mapCol {
+    display: none; /* 窄螢幕直接隱藏旁邊的地圖欄位 */
+  }
+  .mapPeekBtn {
+    display: block; /* 改成顯示「查看地圖」按鈕，點了才開全螢幕地圖 */
+  }
+  #app.wide {
+    max-width: 460px; /* 窄螢幕時，就算是結果頁也不需要放寬容器 */
+  }
+}
+
+.legend {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  font-size: 11px;
+  color: var(--sub);
+  margin-top: 8px;
+}
+.legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+.legend i {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%; /* 圖例前面的小色點，用 <i> 標籤純粹當裝飾用 */
+  display: inline-block;
+}
+
+/* ======================================================================
+   評價／AI 摘要／餐廳詳情頁
+   ====================================================================== */
+.nameBtn {
+  /* 把 <button> 偽裝成一般文字連結的樣子，讓清單裡的店名看起來可以點擊 */
+  background: none;
+  border: 0;
+  padding: 0;
+  font: inherit;
+  font-weight: 700;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  min-height: 0;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+.stars {
+  color: var(--yel);
+  letter-spacing: 1px;
+}
+.ratingRow {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.ratingNum {
+  font-size: 22px;
+  font-weight: 900;
+}
+.tagsRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 10px;
+}
+.chip.pos {
+  /* 好評 Hashtag：綠色 */
+  background: var(--grn);
+  border-color: var(--grn);
+  color: #fff;
+  font-size: 12px;
+  padding: 5px 10px;
+  min-height: 0;
+}
+.chip.neg {
+  /* 常見提醒 Hashtag：紅色 */
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+  font-size: 12px;
+  padding: 5px 10px;
+  min-height: 0;
+}
+.aiBox {
+  background: var(--bg);
+  border: 1.5px dashed var(--line);
+  border-radius: 12px;
+  padding: 12px;
+  font-size: 14px;
+  line-height: 1.7;
+}
+.badgeAI {
+  display: inline-block;
+  background: var(--pur);
+  color: #fff;
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 99px;
+  margin-bottom: 8px;
+  font-weight: 700;
+}
