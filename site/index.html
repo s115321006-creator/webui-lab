@@ -19,21 +19,28 @@
     這一行是響應式網頁（RWD）的關鍵設定：
     width=device-width  → 網頁寬度 = 裝置螢幕寬度（手機、平板、電腦都適用）
     initial-scale=1     → 一開始不要自動縮放
-    viewport-fit=cover  → 讓網頁內容可以延伸到手機瀏海、圓角螢幕的安全範圍之外
+    viewport-fit=cover  → 讓網頁內容可以延伸到手機瀏海、圓角螢幕的安全範圍之外，
+                           搭配下面 CSS 裡的 env(safe-area-inset-*) 一起使用
   -->
 
-  <title>今天吃什麼</title>
+  <title>今天吃什麼：網頁 Demo</title>
   <!-- 瀏覽器分頁上顯示的標題文字 -->
 
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <!-- 從 Google Fonts 載入「思源黑體（Noto Sans TC）」這套中文字型 -->
+  <!-- 從 Google Fonts 載入「思源黑體（Noto Sans TC）」這套中文字型，網站會用這個字型顯示文字 -->
+
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <!--
+    Leaflet 是一套免費的「網頁地圖函式庫」，這一行載入它的樣式檔。
+    它會搭配 OpenStreetMap（免費開放的世界地圖資料）顯示真實的街道地圖，
+    不需要申請金鑰，也不用綁信用卡。
+  -->
 
   <link rel="stylesheet" href="css/style.css">
   <!--
-    重點：把外部的 style.css「接」進這個網頁，路徑 css/style.css
-    代表「從 index.html 所在的位置，往下找 css 資料夾裡的 style.css」，
-    對應您專案裡 site/css/style.css 的實際位置。
-    之後所有版面、顏色、排版都寫在這個檔案裡，HTML 本身不直接寫樣式。
+    重點：這一行把外部的 style.css 檔案「接」進這個網頁。
+    之後所有版面、顏色、排版的樣式都寫在 style.css 裡，
+    HTML 檔案本身只負責放「內容結構」，不直接寫樣式，這樣檔案會比較好維護。
   -->
 </head>
 
@@ -43,31 +50,32 @@
   <div id="app">
     <!--
       #app 是整個網頁的最外層容器。
-      我們把整個 App 設計成「單頁應用（SPA, Single Page Application）」：
+      我們把整個 App 設計成「單頁應用（SPA, Single Page Application）」的概念：
       所有畫面（首頁、篩選、轉盤…）都寫在同一個 HTML 檔案裡，
-      但同一時間只會「顯示」其中一個畫面，其他用 CSS 的 display:none 藏起來，
-      再用 JavaScript 切換哪一個畫面要顯示。
-      每個畫面都用一個 <section class="scr"> 包起來，id 就是這個畫面的名字。
+      但同一時間只會「顯示」其中一個畫面，其他畫面用 CSS 的 display:none 藏起來，
+      再用 JavaScript 去切換哪一個畫面要顯示。
+      每一個畫面都用一個 <section class="scr"> 包起來，id 就是這個畫面的名字。
     -->
 
     <!-- ========== 畫面 1：首頁 ========== -->
     <section class="scr on" id="home">
       <!--
-        class="scr on" 的 "on" 代表「目前顯示中」，網頁一打開預設看到首頁。
-        id="home" 是這個畫面的識別碼，JavaScript 會用 go('home') 切換過來。
+        class="scr on" 的 "on" 代表「目前顯示中」，所以網頁一打開預設看到的就是首頁。
+        id="home" 是這個畫面的識別碼，之後 JavaScript 會用 go('home') 這個函式切換過來。
       -->
       <h1>今天吃什麼？</h1>
       <p class="sub">讓轉盤幫你決定。</p>
 
       <!--
         下面四個按鈕都有 data-go="xxx" 這個自訂屬性（data-* 是 HTML5 允許的自訂屬性寫法）。
-        沒有真的把按鈕連到別的網址，而是讓 JavaScript 讀取 data-go 的值，
+        我們沒有真的把這些按鈕連到別的網址，而是讓 JavaScript 讀取 data-go 的值，
         藉此知道「使用者想切換到哪一個畫面」，這是整個 App 畫面切換的核心機制。
       -->
       <button class="go blk" data-go="filter">轉盤</button>
       <button class="alt blk" data-go="favs">我的最愛</button>
       <button class="alt blk" data-go="black">黑名單</button>
       <button class="alt blk" data-go="custom">自製轉盤</button>
+      <p class="note">Demo 使用範例餐廳資料，正式版會串接 Google Map。</p>
     </section>
 
     <!-- ========== 畫面 2：篩選條件 ========== -->
@@ -77,14 +85,14 @@
         <h2>先縮小範圍</h2>
       </div>
 
-      <!-- 葷素選項：實際按鈕內容由 JavaScript 動態產生，塞進 #fMeat 這個空的 div 裡 -->
+      <!-- 葷素選項：實際的按鈕內容是由 JavaScript 動態產生，塞進 #fMeat 這個空的 div 裡 -->
       <div class="card">
         <h3>葷素</h3>
         <div id="fMeat"></div>
         <p class="hint" id="vegHint" style="display:none">轉盤的餐點類型跟葷食一樣，但搜尋結果只會顯示素食餐廳。</p>
       </div>
 
-      <!-- 主食選項（飯／麵／其他），一樣是空容器，交給 JS 填內容 -->
+      <!-- 主食選項（飯／麵／其他），一樣是空的容器，交給 JS 填內容 -->
       <div class="card">
         <h3>主食（可複選）</h3>
         <div id="fStp"></div>
@@ -99,6 +107,12 @@
         </div>
         <button class="alt" id="auto" style="width:100%">自動定位</button>
         <p class="hint" id="locNote">選擇縣市與區，或使用自動定位。</p>
+        <div id="locMap" aria-label="目前定位的地圖"></div>
+        <!--
+          這個空的 div 是「真實地圖」的容器，一開始是隱藏的（CSS 設 display:none）。
+          自動定位成功後，script.js 會呼叫 Leaflet 把地圖畫進來，
+          並用標記與圓圈標出你的位置與定位誤差範圍。
+        -->
       </div>
 
       <!-- 餐廳範圍（500公尺/1公里/3公里/5公里） -->
@@ -120,9 +134,10 @@
 
       <!--
         這是轉盤本體，用 SVG（可縮放向量圖）畫出來，不是圖片檔案。
-        好處是：可以用 JavaScript 直接操作裡面的形狀和文字，放大縮小也不會模糊。
-        <g id="rot"> 這個群組本身是空的，實際的扇形色塊和文字，
-        是 JavaScript 執行時「即時畫」進去的。
+        用 SVG 的好處是：可以用 JavaScript 直接操作裡面的形狀和文字，
+        而且不管放大縮小，畫面都不會模糊。
+        <g id="rot"> 這個 <g>（group，群組）標籤本身是空的，
+        實際的扇形色塊和文字，是 JavaScript 執行時「即時畫」進去的。
       -->
       <svg class="wb" viewBox="-104 -112 208 216" role="img" aria-label="食物類型轉盤">
         <g id="rot"></g>
@@ -135,14 +150,14 @@
       <p class="res" id="res" aria-live="polite">？</p>
       <!--
         aria-live="polite" 是無障礙（accessibility）屬性：
-        當這段文字內容被 JavaScript 改變時（轉盤結果出來了），
-        螢幕報讀軟體會自動唸出新內容給視障使用者聽。
+        當這段文字的內容被 JavaScript 改變時（轉盤結果出來了），
+        螢幕報讀軟體會自動唸出新的內容給視障使用者聽。
       -->
 
       <div class="row">
         <button class="go" id="spin">轉！</button>
         <button id="like" style="display:none">喜歡，找餐廳</button>
-        <!-- 一開始 like 按鈕是隱藏的，轉完一次之後 JS 才會把它顯示出來 -->
+        <!-- 一開始 like 按鈕是隱藏的（style="display:none"），轉完一次之後 JS 才會把它顯示出來 -->
       </div>
       <p class="note"><a href="#" data-go="custom" style="color:inherit">找不到想吃的？前往自製轉盤</a></p>
     </section>
@@ -155,15 +170,15 @@
       </div>
 
       <div id="rBanner"></div>
-      <!-- 「範圍防呆」的提示訊息（例如：原本範圍找不到，已自動擴大）顯示在這裡 -->
+      <!-- 「範圍防呆」的提示訊息（例如：原本範圍找不到，已自動擴大）會顯示在這裡 -->
 
       <button class="alt mapPeekBtn" id="mapPeekBtn">📍 查看地圖上的相對位置</button>
       <!-- 這顆按鈕只有在「手機／窄螢幕」時才會透過 CSS 顯示出來，用來開啟全螢幕地圖 -->
 
       <!--
         .resultLayout 是「清單 + 地圖」的版面容器：
-        寬螢幕（電腦）時，CSS 讓它變成左右兩欄；
-        窄螢幕（手機）時，CSS 讓地圖欄位整個隱藏，改用上面的 mapPeekBtn 開啟全螢幕地圖。
+        在寬螢幕（電腦）時，CSS 會讓它變成左右兩欄；
+        在窄螢幕（手機）時，CSS 會讓地圖欄位整個隱藏，改用上面的 mapPeekBtn 開啟全螢幕地圖。
       -->
       <div class="resultLayout">
         <div class="listCol">
@@ -301,12 +316,17 @@
   <!-- 畫面最下方浮動出現的小提示訊息（例如「已加入我的最愛」） -->
   <div id="toast" role="status"></div>
 
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <!--
+    載入 Leaflet 的程式碼。一定要放在我們自己的 script.js「之前」，
+    因為 script.js 裡會用到 Leaflet 提供的 L 這個變數，順序顛倒就會抓不到。
+  -->
+
   <script src="js/app.js"></script>
   <!--
-    重點：把外部的 app.js 載入進來執行，路徑 js/app.js 對應
-    您專案裡 site/js/app.js 的實際位置。
-    一定要放在 </body> 的「前面」（所有畫面的 HTML 都寫完之後），
-    這樣 JavaScript 執行時，才能保證畫面上該有的元素（按鈕、容器…）都已經存在，
+    重點：這一行把外部的 script.js 檔案載入進來執行。
+    一定要放在 </body> 的「前面」（也就是所有畫面的 HTML 都寫完之後），
+    這樣 JavaScript 執行的時候，才能保證畫面上該有的元素（按鈕、容器…）都已經存在，
     否則程式裡 document.getElementById(...) 會抓不到東西而報錯。
   -->
 </body>

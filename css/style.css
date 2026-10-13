@@ -567,3 +567,19 @@ label.ck input {
   margin-bottom: 8px;
   font-weight: 700;
 }
+
+/* ======================================================================
+   篩選頁「位置」卡片裡的真實地圖（Leaflet）
+   ====================================================================== */
+#locMap {
+  display: none;            /* 預設隱藏，自動定位成功後才由 JS 顯示 */
+  height: 200px;
+  margin-top: 10px;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  overflow: hidden;
+  position: relative;
+  z-index: 0;
+  /* position + z-index:0 會建立獨立的「層級空間」，
+     避免 Leaflet 內部很大的 z-index 數字蓋過提示訊息（toast）和全螢幕地圖 */
+}
