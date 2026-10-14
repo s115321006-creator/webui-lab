@@ -572,7 +572,6 @@ label.ck input {
    篩選頁「位置」卡片裡的真實地圖（Leaflet）
    ====================================================================== */
 #locMap {
-  display: none;            /* 預設隱藏，自動定位成功後才由 JS 顯示 */
   height: 200px;
   margin-top: 10px;
   border-radius: 12px;
@@ -583,3 +582,33 @@ label.ck input {
   /* position + z-index:0 會建立獨立的「層級空間」，
      避免 Leaflet 內部很大的 z-index 數字蓋過提示訊息（toast）和全螢幕地圖 */
 }
+
+/* ======================================================================
+   工具類別（Utility classes）：JS 靠「加上／拿掉類別」來改變外觀，
+   所以 JS 裡不再直接寫 style.xxx。
+   ====================================================================== */
+.hidden { display: none !important; }   /* 隱藏元素（!important 是為了蓋過手機版 media query 的 display） */
+.noAnim { transition: none !important; } /* 暫時關掉動畫（轉盤歸零時用） */
+.muted { color: var(--sub); }            /* 次要文字顏色 */
+.full { width: 100%; }                   /* 寬度撐滿 */
+.flush { margin: 0; }                    /* 去掉外距 */
+.tightB { margin: 0 0 10px; }            /* 只留下方外距 */
+
+/* ======================================================================
+   原本寫在 HTML／JS 裡的行內樣式，現在集中在這裡
+   ====================================================================== */
+.note a { color: inherit; }                         /* 「前往自製轉盤」連結沿用文字顏色 */
+#rTitle { font-size: 16px; }                        /* 結果頁標題 */
+#dName { font-size: 17px; }                         /* 詳情頁店名 */
+#dCount, #dTime { margin: 0; }
+#dSub { margin-top: 8px; }
+.legend i.blu { background: var(--blu); }           /* 地圖圖例的四種顏色 */
+.legend i.grn { background: var(--grn); }
+.legend i.pur { background: var(--pur); }
+.legend i.red { background: var(--red); }
+.stars.sm { font-size: 12px; }                      /* 小一點的星星 */
+.item small.inline { display: inline; }
+.itemLink { color: inherit; font-weight: 700; }     /* 清單裡的店名連結 */
+.ib.chipDel { padding: 0 4px; min-width: 0; color: #fff; font-size: 14px; } /* 自訂類型的 ✕ */
+button.btnXs { padding: 6px 12px; min-height: 36px; }          /* 清單裡的小按鈕 */
+.btn.btnSm, button.btnSm { padding: 8px 12px; min-height: 36px; } /* 地圖小卡片的按鈕 */

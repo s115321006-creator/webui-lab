@@ -89,7 +89,7 @@
       <div class="card">
         <h3>葷素</h3>
         <div id="fMeat"></div>
-        <p class="hint" id="vegHint" style="display:none">轉盤的餐點類型跟葷食一樣，但搜尋結果只會顯示素食餐廳。</p>
+        <p class="hint hidden" id="vegHint">轉盤的餐點類型跟葷食一樣，但搜尋結果只會顯示素食餐廳。</p>
       </div>
 
       <!-- 主食選項（飯／麵／其他），一樣是空的容器，交給 JS 填內容 -->
@@ -105,9 +105,9 @@
           <select id="city" aria-label="縣市"></select>
           <select id="dist" aria-label="鄉鎮市區"></select>
         </div>
-        <button class="alt" id="auto" style="width:100%">自動定位</button>
+        <button class="alt full" id="auto">自動定位</button>
         <p class="hint" id="locNote">選擇縣市與區，或使用自動定位。</p>
-        <div id="locMap" aria-label="目前定位的地圖"></div>
+        <div id="locMap" class="hidden" aria-label="目前定位的地圖"></div>
         <!--
           這個空的 div 是「真實地圖」的容器，一開始是隱藏的（CSS 設 display:none）。
           自動定位成功後，script.js 會呼叫 Leaflet 把地圖畫進來，
@@ -156,17 +156,17 @@
 
       <div class="row">
         <button class="go" id="spin">轉！</button>
-        <button id="like" style="display:none">喜歡，找餐廳</button>
-        <!-- 一開始 like 按鈕是隱藏的（style="display:none"），轉完一次之後 JS 才會把它顯示出來 -->
+        <button id="like" class="hidden">喜歡，找餐廳</button>
+        <!-- 一開始 like 按鈕是隱藏的（class="hidden"），轉完一次之後 JS 才會把 hidden 拿掉 -->
       </div>
-      <p class="note"><a href="#" data-go="custom" style="color:inherit">找不到想吃的？前往自製轉盤</a></p>
+      <p class="note"><a href="#" data-go="custom">找不到想吃的？前往自製轉盤</a></p>
     </section>
 
     <!-- ========== 畫面 4：餐廳搜尋結果（清單 + 地圖） ========== -->
     <section class="scr" id="result">
       <div class="top">
         <button class="alt back" data-go="wheel">←</button>
-        <h2 id="rTitle" style="font-size:16px"></h2>
+        <h2 id="rTitle"></h2>
       </div>
 
       <div id="rBanner"></div>
@@ -194,12 +194,12 @@
               <!-- 跟轉盤一樣，這也是空的 SVG，地圖上的點和圈圈都是 JS 畫上去的 -->
             </div>
             <div class="legend">
-              <span><i style="background:var(--blu)"></i>你的位置／搜尋中心</span>
-              <span><i style="background:var(--grn)"></i>一般餐廳</span>
-              <span><i style="background:var(--pur)"></i>已收藏</span>
-              <span><i style="background:var(--red)"></i>自訂餐廳</span>
+              <span><i class="blu"></i>你的位置／搜尋中心</span>
+              <span><i class="grn"></i>一般餐廳</span>
+              <span><i class="pur"></i>已收藏</span>
+              <span><i class="red"></i>自訂餐廳</span>
             </div>
-            <div class="mapDetail" id="mapDetail" style="display:none"></div>
+            <div class="mapDetail hidden" id="mapDetail"></div>
             <!-- 點地圖上的標記後，餐廳的詳細小卡片會顯示在這裡 -->
             <p class="hint">位置為依距離估算的相對示意圖，非實際地圖座標。</p>
           </div>
@@ -213,16 +213,16 @@
     <section class="scr" id="detail">
       <div class="top">
         <button class="alt back" data-go="result">←</button>
-        <h2 id="dName" style="font-size:17px"></h2>
+        <h2 id="dName"></h2>
       </div>
 
       <div class="card">
         <div class="ratingRow">
           <span class="ratingNum" id="dRatingNum"></span>
           <span class="stars" id="dStars" aria-hidden="true"></span>
-          <span class="hint" id="dCount" style="margin:0"></span>
+          <span class="hint" id="dCount"></span>
         </div>
-        <p class="hint" id="dSub" style="margin-top:8px"></p>
+        <p class="hint" id="dSub"></p>
         <div class="tagsRow" id="dTags"></div>
         <!-- 好評／提醒的 Hashtag 標籤會動態產生在這裡 -->
       </div>
@@ -235,7 +235,7 @@
 
       <div class="card" id="dTimeCard">
         <h3>距離與時間</h3>
-        <p class="hint" id="dTime" style="margin:0"></p>
+        <p class="hint" id="dTime"></p>
       </div>
 
       <div class="row">
@@ -303,12 +303,12 @@
         <svg id="mapSvgFull" viewBox="0 0 320 320" width="100%" role="img" aria-label="餐廳相對位置示意地圖（放大）"></svg>
       </div>
       <div class="legend">
-        <span><i style="background:var(--blu)"></i>你的位置／搜尋中心</span>
-        <span><i style="background:var(--grn)"></i>一般餐廳</span>
-        <span><i style="background:var(--pur)"></i>已收藏</span>
-        <span><i style="background:var(--red)"></i>自訂餐廳</span>
+        <span><i class="blu"></i>你的位置／搜尋中心</span>
+        <span><i class="grn"></i>一般餐廳</span>
+        <span><i class="pur"></i>已收藏</span>
+        <span><i class="red"></i>自訂餐廳</span>
       </div>
-      <div class="mapDetail" id="mapDetailFull" style="display:none"></div>
+      <div class="mapDetail hidden" id="mapDetailFull"></div>
       <p class="hint">位置為依距離估算的相對示意圖，非實際地圖座標。</p>
     </div>
   </div>
@@ -322,7 +322,18 @@
     因為 script.js 裡會用到 Leaflet 提供的 L 這個變數，順序顛倒就會抓不到。
   -->
 
-  <script src="js/app.js"></script>
+  <script src="js/data.js"></script>
+<script src="js/core.js"></script>
+<script src="js/location.js"></script>
+<script src="js/filter.js"></script>
+<script src="js/wheel.js"></script>
+<script src="js/restaurants.js"></script>
+<script src="js/reviews.js"></script>
+<script src="js/detail.js"></script>
+<script src="js/results.js"></script>
+<script src="js/map.js"></script>
+<script src="js/custom.js"></script>
+<script src="js/lists.js"></script>
   <!--
     重點：這一行把外部的 script.js 檔案載入進來執行。
     一定要放在 </body> 的「前面」（也就是所有畫面的 HTML 都寫完之後），
