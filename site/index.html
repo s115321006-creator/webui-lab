@@ -1,344 +1,187 @@
 <!DOCTYPE html>
-<!--
-  這是一個 HTML5 文件。<!DOCTYPE html> 這一行告訴瀏覽器：
-  「請用最新版的 HTML5 標準來解析這份文件」，一定要放在檔案最上面第一行。
--->
 <html lang="zh-Hant">
-<!-- lang="zh-Hant" 告訴瀏覽器與搜尋引擎這個網頁的語言是「繁體中文」 -->
-
 <head>
-  <!--
-    <head> 裡面放的是「給瀏覽器看」的設定資訊，使用者不會直接看到這些內容，
-    但它們會影響網頁怎麼顯示、怎麼被搜尋到。
-  -->
-  <meta charset="utf-8">
-  <!-- 指定文字編碼為 UTF-8，這樣中文字才不會變成亂碼 -->
-
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-  <!--
-    這一行是響應式網頁（RWD）的關鍵設定：
-    width=device-width  → 網頁寬度 = 裝置螢幕寬度（手機、平板、電腦都適用）
-    initial-scale=1     → 一開始不要自動縮放
-    viewport-fit=cover  → 讓網頁內容可以延伸到手機瀏海、圓角螢幕的安全範圍之外，
-                           搭配下面 CSS 裡的 env(safe-area-inset-*) 一起使用
-  -->
-
-  <title>今天吃什麼：網頁 Demo</title>
-  <!-- 瀏覽器分頁上顯示的標題文字 -->
-
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <!-- 從 Google Fonts 載入「思源黑體（Noto Sans TC）」這套中文字型，網站會用這個字型顯示文字 -->
-
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-  <!--
-    Leaflet 是一套免費的「網頁地圖函式庫」，這一行載入它的樣式檔。
-    它會搭配 OpenStreetMap（免費開放的世界地圖資料）顯示真實的街道地圖，
-    不需要申請金鑰，也不用綁信用卡。
-  -->
-
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#edf3e9">
+  <title>今天吃什麼？</title>
   <link rel="stylesheet" href="css/style.css">
-  <!--
-    重點：這一行把外部的 style.css 檔案「接」進這個網頁。
-    之後所有版面、顏色、排版的樣式都寫在 style.css 裡，
-    HTML 檔案本身只負責放「內容結構」，不直接寫樣式，這樣檔案會比較好維護。
-  -->
 </head>
-
 <body>
-  <!-- <body> 裡面放的才是使用者在瀏覽器裡「真正看得到」的內容 -->
+  <main class="app">
+    <section class="scr home-screen on" id="home" aria-labelledby="home-title">
+      <header class="home-heading">
+        <h1 id="home-title">今天吃什麼？</h1>
+        <p>讓轉盤幫你決定。</p>
+      </header>
 
-  <div id="app">
-    <!--
-      #app 是整個網頁的最外層容器。
-      我們把整個 App 設計成「單頁應用（SPA, Single Page Application）」的概念：
-      所有畫面（首頁、篩選、轉盤…）都寫在同一個 HTML 檔案裡，
-      但同一時間只會「顯示」其中一個畫面，其他畫面用 CSS 的 display:none 藏起來，
-      再用 JavaScript 去切換哪一個畫面要顯示。
-      每一個畫面都用一個 <section class="scr"> 包起來，id 就是這個畫面的名字。
-    -->
+      <nav class="home-actions" aria-label="主要功能">
+        <button class="button button-primary" type="button" data-go="filter">轉盤</button>
+        <button class="button button-outline" type="button" data-go="favorites">我的最愛</button>
+        <button class="button button-outline" type="button" data-go="blacklist">黑名單</button>
+        <button class="button button-outline" type="button" data-go="custom">自製轉盤</button>
+      </nav>
 
-    <!-- ========== 畫面 1：首頁 ========== -->
-    <section class="scr on" id="home">
-      <!--
-        class="scr on" 的 "on" 代表「目前顯示中」，所以網頁一打開預設看到的就是首頁。
-        id="home" 是這個畫面的識別碼，之後 JavaScript 會用 go('home') 這個函式切換過來。
-      -->
-      <h1>今天吃什麼？</h1>
-      <p class="sub">讓轉盤幫你決定。</p>
-
-      <!--
-        下面四個按鈕都有 data-go="xxx" 這個自訂屬性（data-* 是 HTML5 允許的自訂屬性寫法）。
-        我們沒有真的把這些按鈕連到別的網址，而是讓 JavaScript 讀取 data-go 的值，
-        藉此知道「使用者想切換到哪一個畫面」，這是整個 App 畫面切換的核心機制。
-      -->
-      <button class="go blk" data-go="filter">轉盤</button>
-      <button class="alt blk" data-go="favs">我的最愛</button>
-      <button class="alt blk" data-go="black">黑名單</button>
-      <button class="alt blk" data-go="custom">自製轉盤</button>
-      <p class="note">Demo 使用範例餐廳資料，正式版會串接 Google Map。</p>
+      <p class="demo-note">目前使用示範資料，正式版餐廳資料會再接上 Google Map。</p>
     </section>
 
-    <!-- ========== 畫面 2：篩選條件 ========== -->
-    <section class="scr" id="filter">
-      <div class="top">
-        <button class="alt back" data-go="home">←</button>
-        <h2>先縮小範圍</h2>
-      </div>
+    <section class="scr filter-screen" id="filter" aria-labelledby="filter-title">
+      <header class="screen-heading">
+        <button class="back-button" type="button" data-go="home" aria-label="返回首頁">←</button>
+        <h1 id="filter-title">先縮小範圍</h1>
+      </header>
 
-      <!-- 葷素選項：實際的按鈕內容是由 JavaScript 動態產生，塞進 #fMeat 這個空的 div 裡 -->
-      <div class="card">
-        <h3>葷素</h3>
-        <div id="fMeat"></div>
-        <p class="hint hidden" id="vegHint">轉盤的餐點類型跟葷食一樣，但搜尋結果只會顯示素食餐廳。</p>
-      </div>
-
-      <!-- 主食選項（飯／麵／其他），一樣是空的容器，交給 JS 填內容 -->
-      <div class="card">
-        <h3>主食（可複選）</h3>
-        <div id="fStp"></div>
-      </div>
-
-      <!-- 位置：兩個下拉選單（縣市、鄉鎮市區）＋一個自動定位按鈕 -->
-      <div class="card">
-        <h3>位置</h3>
-        <div class="two">
-          <select id="city" aria-label="縣市"></select>
-          <select id="dist" aria-label="鄉鎮市區"></select>
-        </div>
-        <button class="alt full" id="auto">自動定位</button>
-        <p class="hint" id="locNote">選擇縣市與區，或使用自動定位。</p>
-        <div id="locMap" class="hidden" aria-label="目前定位的地圖"></div>
-        <!--
-          這個空的 div 是「真實地圖」的容器，一開始是隱藏的（CSS 設 display:none）。
-          自動定位成功後，script.js 會呼叫 Leaflet 把地圖畫進來，
-          並用標記與圓圈標出你的位置與定位誤差範圍。
-        -->
-      </div>
-
-      <!-- 餐廳範圍（500公尺/1公里/3公里/5公里） -->
-      <div class="card">
-        <h3>餐廳範圍</h3>
-        <div id="fRng"></div>
-        <p class="hint">範圍內若找不到餐廳，會自動幫你擴大範圍。</p>
-      </div>
-
-      <button class="go blk" id="start">開始轉</button>
-    </section>
-
-    <!-- ========== 畫面 3：轉盤 ========== -->
-    <section class="scr" id="wheel">
-      <div class="top">
-        <button class="alt back" data-go="filter">←</button>
-        <h2>轉盤</h2>
-      </div>
-
-      <!--
-        這是轉盤本體，用 SVG（可縮放向量圖）畫出來，不是圖片檔案。
-        用 SVG 的好處是：可以用 JavaScript 直接操作裡面的形狀和文字，
-        而且不管放大縮小，畫面都不會模糊。
-        <g id="rot"> 這個 <g>（group，群組）標籤本身是空的，
-        實際的扇形色塊和文字，是 JavaScript 執行時「即時畫」進去的。
-      -->
-      <svg class="wb" viewBox="-104 -112 208 216" role="img" aria-label="食物類型轉盤">
-        <g id="rot"></g>
-        <circle r="10" fill="var(--ink)"/>
-        <!-- 轉盤正中央的黑色圓點（軸心裝飾） -->
-        <path d="M-9 -104 L9 -104 L0 -84 Z" fill="var(--ink)" stroke="var(--bg)" stroke-width="2"/>
-        <!-- 轉盤上方固定不動的小三角形，代表「指針」，指到哪一格就是轉盤結果 -->
-      </svg>
-
-      <p class="res" id="res" aria-live="polite">？</p>
-      <!--
-        aria-live="polite" 是無障礙（accessibility）屬性：
-        當這段文字的內容被 JavaScript 改變時（轉盤結果出來了），
-        螢幕報讀軟體會自動唸出新的內容給視障使用者聽。
-      -->
-
-      <div class="row">
-        <button class="go" id="spin">轉！</button>
-        <button id="like" class="hidden">喜歡，找餐廳</button>
-        <!-- 一開始 like 按鈕是隱藏的（class="hidden"），轉完一次之後 JS 才會把 hidden 拿掉 -->
-      </div>
-      <p class="note"><a href="#" data-go="custom">找不到想吃的？前往自製轉盤</a></p>
-    </section>
-
-    <!-- ========== 畫面 4：餐廳搜尋結果（清單 + 地圖） ========== -->
-    <section class="scr" id="result">
-      <div class="top">
-        <button class="alt back" data-go="wheel">←</button>
-        <h2 id="rTitle"></h2>
-      </div>
-
-      <div id="rBanner"></div>
-      <!-- 「範圍防呆」的提示訊息（例如：原本範圍找不到，已自動擴大）會顯示在這裡 -->
-
-      <button class="alt mapPeekBtn" id="mapPeekBtn">📍 查看地圖上的相對位置</button>
-      <!-- 這顆按鈕只有在「手機／窄螢幕」時才會透過 CSS 顯示出來，用來開啟全螢幕地圖 -->
-
-      <!--
-        .resultLayout 是「清單 + 地圖」的版面容器：
-        在寬螢幕（電腦）時，CSS 會讓它變成左右兩欄；
-        在窄螢幕（手機）時，CSS 會讓地圖欄位整個隱藏，改用上面的 mapPeekBtn 開啟全螢幕地圖。
-      -->
-      <div class="resultLayout">
-        <div class="listCol">
-          <div class="card" id="rList"></div>
-          <!-- 符合條件的餐廳清單，由 JavaScript 動態產生一筆一筆的項目塞進這裡 -->
-        </div>
-
-        <aside class="mapCol" id="mapCol">
-          <div class="mapCard">
-            <h3>相對位置示意圖</h3>
-            <div class="mapSvgWrap">
-              <svg id="mapSvg" viewBox="0 0 260 260" width="100%" role="img" aria-label="餐廳相對位置示意地圖"></svg>
-              <!-- 跟轉盤一樣，這也是空的 SVG，地圖上的點和圈圈都是 JS 畫上去的 -->
-            </div>
-            <div class="legend">
-              <span><i class="blu"></i>你的位置／搜尋中心</span>
-              <span><i class="grn"></i>一般餐廳</span>
-              <span><i class="pur"></i>已收藏</span>
-              <span><i class="red"></i>自訂餐廳</span>
-            </div>
-            <div class="mapDetail hidden" id="mapDetail"></div>
-            <!-- 點地圖上的標記後，餐廳的詳細小卡片會顯示在這裡 -->
-            <p class="hint">位置為依距離估算的相對示意圖，非實際地圖座標。</p>
+      <div class="filter-groups">
+        <section class="filter-card" aria-labelledby="meat-title">
+          <h2 id="meat-title">葷素</h2>
+          <div class="choice-list" role="group" aria-labelledby="meat-title">
+            <button class="choice is-selected" type="button" data-filter-group="meat"
+              data-value="all" aria-pressed="true">都可以</button>
+            <button class="choice" type="button" data-filter-group="meat"
+              data-value="meat" aria-pressed="false">葷食</button>
+            <button class="choice" type="button" data-filter-group="meat"
+              data-value="veg" aria-pressed="false">素食</button>
           </div>
-        </aside>
+        </section>
+
+        <section class="filter-card" aria-labelledby="staple-title">
+          <h2 id="staple-title">主食（可複選）</h2>
+          <div class="choice-list" role="group" aria-labelledby="staple-title">
+            <button class="choice is-selected" type="button" data-filter-group="stp"
+              data-value="rice" aria-pressed="true">飯</button>
+            <button class="choice is-selected" type="button" data-filter-group="stp"
+              data-value="noodle" aria-pressed="true">麵</button>
+            <button class="choice is-selected" type="button" data-filter-group="stp"
+              data-value="other" aria-pressed="true">其他</button>
+          </div>
+        </section>
+
+        <section class="filter-card location-card" aria-labelledby="location-title">
+          <h2 id="location-title">位置</h2>
+          <div class="location-selects">
+            <label class="visually-hidden" for="city-select">縣市</label>
+            <select id="city-select" name="city">
+              <option value="">縣市</option>
+              <option value="臺北市">臺北市</option>
+              <option value="臺中市">臺中市</option>
+              <option value="高雄市">高雄市</option>
+            </select>
+            <label class="visually-hidden" for="dist-select">鄉鎮市區</label>
+            <select id="dist-select" name="dist" disabled>
+              <option value="">鄉鎮市區</option>
+            </select>
+          </div>
+          <button class="button button-outline locate-button" type="button" data-coming-soon
+            data-message="自動定位會在位置功能階段實作，目前可以先選縣市與行政區。">
+            自動定位
+          </button>
+          <p class="field-help">選擇縣市與行政區，或使用自動定位。</p>
+        </section>
+
+        <section class="filter-card" aria-labelledby="range-title">
+          <h2 id="range-title">餐廳範圍</h2>
+          <div class="choice-list" role="group" aria-labelledby="range-title">
+            <button class="choice" type="button" data-filter-group="rng"
+              data-value="500" aria-pressed="false">500 公尺</button>
+            <button class="choice is-selected" type="button" data-filter-group="rng"
+              data-value="1000" aria-pressed="true">1 公里</button>
+            <button class="choice" type="button" data-filter-group="rng"
+              data-value="3000" aria-pressed="false">3 公里</button>
+            <button class="choice" type="button" data-filter-group="rng"
+              data-value="5000" aria-pressed="false">5 公里</button>
+          </div>
+          <p class="field-help">範圍內若找不到餐廳，會自動幫你擴大範圍。</p>
+        </section>
       </div>
 
-      <p class="note">♡ 收藏　⊘ 加入黑名單（之後不再出現）</p>
+      <button class="button button-primary start-button" type="button" data-coming-soon
+        data-message="篩選畫面已完成；轉盤會在下一階段實作。">開始轉</button>
     </section>
 
-    <!-- ========== 畫面 5：餐廳詳情（評分／Hashtag／AI 摘要） ========== -->
-    <section class="scr" id="detail">
-      <div class="top">
-        <button class="alt back" data-go="result">←</button>
-        <h2 id="dName"></h2>
-      </div>
-
-      <div class="card">
-        <div class="ratingRow">
-          <span class="ratingNum" id="dRatingNum"></span>
-          <span class="stars" id="dStars" aria-hidden="true"></span>
-          <span class="hint" id="dCount"></span>
-        </div>
-        <p class="hint" id="dSub"></p>
-        <div class="tagsRow" id="dTags"></div>
-        <!-- 好評／提醒的 Hashtag 標籤會動態產生在這裡 -->
-      </div>
-
-      <div class="card">
-        <span class="badgeAI">✦ AI 生成評論懶人包</span>
-        <div class="aiBox" id="dSummary"></div>
-        <p class="hint">根據評論內容自動整理，實際口味與服務可能因人而異。</p>
-      </div>
-
-      <div class="card" id="dTimeCard">
-        <h3>距離與時間</h3>
-        <p class="hint" id="dTime"></p>
-      </div>
-
-      <div class="row">
-        <a class="btn go" id="dMapLink" target="_blank" rel="noopener">開 Google Map</a>
-        <button class="alt" id="dFav">♡ 收藏</button>
-        <button class="alt" id="dBl">⊘ 加入黑名單</button>
-      </div>
-      <p class="note">評分、評論摘要與 Hashtag 為 Demo 模擬資料，非真實評論內容。</p>
+    <section class="scr list-screen" id="favorites" aria-labelledby="favorites-title">
+      <header class="screen-heading">
+        <button class="back-button" type="button" data-go="home" aria-label="返回首頁">←</button>
+        <h1 id="favorites-title">我的最愛</h1>
+      </header>
+      <p class="page-intro">收藏的餐廳會保存在這台裝置的瀏覽器裡。</p>
+      <ul class="entry-list" id="favorites-list" aria-live="polite"></ul>
+      <p class="empty-state hidden" id="favorites-empty">
+        目前還沒有收藏的餐廳。完成轉盤與餐廳結果功能後，就能從結果頁加入最愛。
+      </p>
     </section>
 
-    <!-- ========== 畫面 6：自製轉盤 ========== -->
-    <section class="scr" id="custom">
-      <div class="top">
-        <button class="alt back" data-go="home">←</button>
-        <h2>自製轉盤</h2>
-      </div>
-
-      <div class="card">
-        <h3>我的餐點類型</h3>
-        <div id="cTypes"></div>
-        <input id="newType" placeholder="新增類型，例如：宵夜" aria-label="新增類型">
-        <button class="alt" id="addType">新增類型</button>
-      </div>
-
-      <div class="card">
-        <h3>新增餐廳</h3>
-        <input id="rName" placeholder="店名" aria-label="店名">
-        <select id="rType" aria-label="所屬類型"></select>
-        <select id="rStp" aria-label="主食類型">
-          <option value="飯">飯</option>
-          <option value="麵">麵</option>
-          <option value="其他">其他</option>
-        </select>
-        <label class="ck"><input type="checkbox" id="rVeg">這是素食餐廳</label>
-        <button class="go" id="addRest">儲存餐廳</button>
-        <p class="hint">儲存後，下次轉到該類型，這家店會出現在搜尋結果。</p>
-      </div>
-
-      <div class="card">
-        <h3>我新增的餐廳</h3>
-        <div id="cRests"></div>
-      </div>
+    <section class="scr list-screen" id="blacklist" aria-labelledby="blacklist-title">
+      <header class="screen-heading">
+        <button class="back-button" type="button" data-go="home" aria-label="返回首頁">←</button>
+        <h1 id="blacklist-title">黑名單</h1>
+      </header>
+      <p class="page-intro">加入黑名單的餐廳會從之後的抽選結果中排除。</p>
+      <ul class="entry-list" id="blacklist-list" aria-live="polite"></ul>
+      <p class="empty-state hidden" id="blacklist-empty">
+        黑名單目前是空的。餐廳結果功能完成後，就能從結果頁加入黑名單。
+      </p>
     </section>
 
-    <!-- ========== 畫面 7 / 8：我的最愛、黑名單 ========== -->
-    <section class="scr" id="favs">
-      <div class="top"><button class="alt back" data-go="home">←</button><h2>我的最愛</h2></div>
-      <div class="card" id="favL"></div>
+    <section class="scr custom-screen" id="custom" aria-labelledby="custom-title">
+      <header class="screen-heading">
+        <button class="back-button" type="button" data-go="home" aria-label="返回首頁">←</button>
+        <h1 id="custom-title">自製轉盤</h1>
+      </header>
+      <p class="page-intro">先新增轉盤類型，再把自己的餐廳放進類型裡。資料會保存在這台裝置。</p>
+
+      <section class="form-card" aria-labelledby="category-title">
+        <h2 id="category-title">自訂類型</h2>
+        <form id="category-form" class="entry-form">
+          <label for="category-name">類型名稱</label>
+          <div class="form-row">
+            <input id="category-name" name="category" type="text" maxlength="30"
+              placeholder="例如：宵夜" required>
+            <button class="button button-primary form-submit" type="submit">新增類型</button>
+          </div>
+        </form>
+        <ul class="entry-list compact-list" id="custom-category-list" aria-live="polite"></ul>
+        <p class="empty-state hidden" id="custom-category-empty">還沒有自訂類型，先新增一個吧。</p>
+      </section>
+
+      <section class="form-card" aria-labelledby="restaurant-title">
+        <h2 id="restaurant-title">自訂餐廳</h2>
+        <form id="restaurant-form" class="entry-form">
+          <label for="restaurant-name">店名</label>
+          <input id="restaurant-name" name="name" type="text" maxlength="60"
+            placeholder="例如：巷口麵店" required>
+
+          <label for="restaurant-type">所屬類型</label>
+          <select id="restaurant-type" name="type" required>
+            <option value="">請先選擇類型</option>
+          </select>
+
+          <label for="restaurant-address">地址</label>
+          <input id="restaurant-address" name="address" type="text" maxlength="120"
+            placeholder="例如：臺北市大安區和平東路一段" required>
+
+          <label class="checkbox-label" for="restaurant-vegetarian">
+            <input id="restaurant-vegetarian" name="vegetarian" type="checkbox">
+            這家餐廳提供素食
+          </label>
+
+          <button class="button button-primary form-submit" id="restaurant-submit"
+            type="submit" disabled>新增餐廳</button>
+          <p class="field-help" id="restaurant-form-help">先新增一個自訂類型，才能新增餐廳。</p>
+        </form>
+        <ul class="entry-list compact-list" id="custom-restaurant-list" aria-live="polite"></ul>
+        <p class="empty-state hidden" id="custom-restaurant-empty">還沒有自訂餐廳。</p>
+      </section>
     </section>
-    <section class="scr" id="black">
-      <div class="top"><button class="alt back" data-go="home">←</button><h2>黑名單</h2></div>
-      <div class="card" id="blL"></div>
-    </section>
-  </div>
-  <!-- #app 容器到這裡結束 -->
+  </main>
 
-  <!-- 全螢幕地圖彈窗：放在 #app 外面，用 position:fixed 蓋滿整個畫面，手機版才會用到 -->
-  <div class="mapOverlay" id="mapOverlay">
-    <div class="mapOverlayInner">
-      <div class="top">
-        <button class="alt back" id="closeMap">✕</button>
-        <h2>相對位置示意圖</h2>
-      </div>
-      <div class="mapSvgWrap">
-        <svg id="mapSvgFull" viewBox="0 0 320 320" width="100%" role="img" aria-label="餐廳相對位置示意地圖（放大）"></svg>
-      </div>
-      <div class="legend">
-        <span><i class="blu"></i>你的位置／搜尋中心</span>
-        <span><i class="grn"></i>一般餐廳</span>
-        <span><i class="pur"></i>已收藏</span>
-        <span><i class="red"></i>自訂餐廳</span>
-      </div>
-      <div class="mapDetail hidden" id="mapDetailFull"></div>
-      <p class="hint">位置為依距離估算的相對示意圖，非實際地圖座標。</p>
-    </div>
-  </div>
+  <p class="toast hidden" id="toast" role="status" aria-live="polite"></p>
 
-  <!-- 畫面最下方浮動出現的小提示訊息（例如「已加入我的最愛」） -->
-  <div id="toast" role="status"></div>
-
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-  <!--
-    載入 Leaflet 的程式碼。一定要放在我們自己的 script.js「之前」，
-    因為 script.js 裡會用到 Leaflet 提供的 L 這個變數，順序顛倒就會抓不到。
-  -->
-
+  <!-- JavaScript 依照相依順序載入；自製轉盤和清單功能放在共用函式之後。 -->
   <script src="js/data.js"></script>
-<script src="js/core.js"></script>
-<script src="js/location.js"></script>
-<script src="js/filter.js"></script>
-<script src="js/wheel.js"></script>
-<script src="js/restaurants.js"></script>
-<script src="js/reviews.js"></script>
-<script src="js/detail.js"></script>
-<script src="js/results.js"></script>
-<script src="js/map.js"></script>
-<script src="js/custom.js"></script>
-<script src="js/lists.js"></script>
-  <!--
-    重點：這一行把外部的 script.js 檔案載入進來執行。
-    一定要放在 </body> 的「前面」（也就是所有畫面的 HTML 都寫完之後），
-    這樣 JavaScript 執行的時候，才能保證畫面上該有的元素（按鈕、容器…）都已經存在，
-    否則程式裡 document.getElementById(...) 會抓不到東西而報錯。
-  -->
+  <script src="js/core.js"></script>
+  <script src="js/location.js"></script>
+  <script src="js/filter.js"></script>
+  <script src="js/custom.js"></script>
+  <script src="js/lists.js"></script>
 </body>
 </html>
