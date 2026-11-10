@@ -62,6 +62,12 @@ function renderSavedList(listName) {
   }
 
   setHidden(emptyId, entries.length > 0);
+  updateHomeListCounts();
+}
+
+function updateHomeListCounts() {
+  $('#favorites-count').textContent = S.fav.length ? '(' + S.fav.length + ')' : '';
+  $('#blacklist-count').textContent = S.bl.length ? '(' + S.bl.length + ')' : '';
 }
 
 document.addEventListener('click', function (event) {

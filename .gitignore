@@ -10,6 +10,9 @@ build/
 .env.local
 .env.*.local
 
+# Google 帳號使用者 JSON
+data/users/
+
 # 編輯器與系統
 .vscode/
 .DS_Store

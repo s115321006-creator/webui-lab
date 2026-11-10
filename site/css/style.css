@@ -65,6 +65,109 @@ select:focus-visible {
   margin-bottom: 26px;
 }
 
+.home-account-bar {
+  position: relative;
+  display: flex;
+  min-height: 34px;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.sync-indicator {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-right: auto;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.sync-check {
+  color: var(--green);
+  font-weight: 800;
+}
+
+.login-entry,
+.account-trigger {
+  min-width: 46px;
+  min-height: 32px;
+  padding: 4px 12px;
+  border: 1.5px solid #26332d;
+  border-radius: 999px;
+  background: var(--card-bg);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.account-trigger {
+  display: grid;
+  width: 36px;
+  min-width: 36px;
+  height: 36px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  background: var(--green);
+  color: #ffffff;
+  font-size: 1rem;
+}
+
+.account-menu-wrap {
+  position: relative;
+}
+
+.account-menu {
+  position: absolute;
+  z-index: 5;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 220px;
+  padding: 10px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card-bg);
+  box-shadow: 0 10px 30px rgba(23, 37, 31, 0.16);
+}
+
+.account-menu-user {
+  margin: 3px 8px 8px;
+  overflow-wrap: anywhere;
+  font-size: 0.86rem;
+  font-weight: 700;
+}
+
+.account-menu-item,
+.account-sync-status {
+  display: flex;
+  width: 100%;
+  min-height: 38px;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  font-size: 0.88rem;
+}
+
+.account-menu-item:hover {
+  background: var(--page-bg);
+}
+
+.account-sync-status strong {
+  margin-left: auto;
+  color: var(--green);
+  font-size: 0.8rem;
+}
+
+.home-heading {
+  margin-bottom: 22px;
+}
+
 .home-heading h1 {
   margin: 0 0 10px;
   font-size: clamp(2rem, 6vw, 2.8rem);
@@ -77,13 +180,193 @@ select:focus-visible {
   font-size: 1.15rem;
 }
 
+.account-panel {
+  margin: 0 0 14px;
+}
+
+.guest-note {
+  margin: 0;
+  padding: 9px 11px;
+  border: 1px dashed var(--green);
+  border-radius: 11px;
+  color: var(--muted);
+  font-size: 0.83rem;
+  line-height: 1.5;
+}
+
+.guest-note span {
+  margin-right: 4px;
+}
+
+.home-count:not(:empty) {
+  margin-left: 3px;
+}
+
+.login-screen {
+  width: min(100%, 530px);
+  margin: 0 auto;
+}
+
+.login-screen-heading {
+  gap: 8px;
+  margin-bottom: 18px;
+}
+
+.login-screen-heading .back-button {
+  width: 30px;
+  height: 30px;
+  border: 0;
+  font-size: 0.9rem;
+}
+
+.login-back-label {
+  color: var(--muted);
+  font-size: 0.88rem;
+}
+
+.login-card {
+  width: min(100%, 440px);
+  margin: 24px auto 0;
+}
+
+.login-card h1 {
+  margin: 0 0 7px;
+  font-size: 1.8rem;
+}
+
+.login-intro {
+  margin: 0 0 20px;
+  color: var(--muted);
+  font-size: 0.92rem;
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  overflow: hidden;
+  margin-bottom: 16px;
+  border: 2px solid #26332d;
+  border-radius: 12px;
+}
+
+.auth-tab {
+  min-height: 42px;
+  border: 0;
+  background: var(--card-bg);
+  font-size: 0.95rem;
+  font-weight: 700;
+}
+
+.auth-tab.is-active {
+  background: #26332d;
+  color: #ffffff;
+}
+
+.email-auth-form {
+  display: grid;
+  gap: 8px;
+}
+
+.email-auth-form label {
+  margin-top: 2px;
+  font-size: 0.87rem;
+  font-weight: 700;
+}
+
+.email-auth-form input {
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--card-bg);
+  color: var(--text);
+}
+
+.password-field {
+  position: relative;
+}
+
+.password-field input {
+  padding-right: 58px;
+}
+
+.password-toggle,
+.forgot-password {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 0.82rem;
+}
+
+.password-toggle {
+  position: absolute;
+  top: 50%;
+  right: 9px;
+  padding: 6px;
+  transform: translateY(-50%);
+}
+
+.forgot-password {
+  justify-self: end;
+  padding: 3px 0;
+}
+
+.email-submit {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 2px;
+  border-radius: 11px;
+  font-size: 0.98rem;
+}
+
+.auth-unavailable,
+.guest-login-note {
+  margin: 9px 0 0;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+  text-align: center;
+}
+
+.auth-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 15px 0 12px;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.auth-divider::before,
+.auth-divider::after {
+  height: 1px;
+  flex: 1;
+  background: var(--border);
+  content: "";
+}
+
+.google-signin-wrap {
+  display: flex;
+  min-height: 44px;
+  justify-content: center;
+}
+
+.guest-button {
+  width: 100%;
+  min-height: 48px;
+  margin-top: 10px;
+  border-radius: 11px;
+  font-size: 0.96rem;
+}
+
 .home-actions {
   display: grid;
-  gap: 12px;
+  gap: 9px;
 }
 
 .button {
-  min-height: 58px;
+  min-height: 50px;
   border: 2px solid transparent;
   border-radius: 15px;
   font-weight: 700;
@@ -116,7 +399,7 @@ select:focus-visible {
 }
 
 .demo-note {
-  margin: 22px 0 0;
+  margin: 16px 0 0;
   color: var(--muted);
   text-align: center;
   line-height: 1.7;

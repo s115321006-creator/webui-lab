@@ -11,19 +11,102 @@
 <body>
   <main class="app">
     <section class="scr home-screen on" id="home" aria-labelledby="home-title">
+      <div class="home-account-bar">
+        <div class="sync-indicator hidden" id="sync-indicator" aria-live="polite">
+          <span class="sync-check" aria-hidden="true">✓</span>
+          <span>已同步</span>
+        </div>
+        <div class="account-menu-wrap">
+          <button class="account-trigger hidden" id="account-trigger" type="button"
+            aria-label="開啟帳號選單" aria-expanded="false" aria-controls="account-menu"></button>
+          <div class="account-menu hidden" id="account-menu">
+            <p class="account-menu-user" id="account-menu-user"></p>
+            <button type="button" class="account-menu-item" id="account-menu-profile">
+              <span aria-hidden="true">●</span> 我的帳號
+            </button>
+            <div class="account-sync-status">
+              <span aria-hidden="true">✓</span> 同步狀態
+              <strong>已同步</strong>
+            </div>
+            <button type="button" class="account-menu-item" id="logout-button">
+              <span aria-hidden="true">↪</span> 登出
+            </button>
+          </div>
+        </div>
+        <button class="login-entry" id="login-entry" type="button" data-go="login">登入</button>
+      </div>
+
       <header class="home-heading">
         <h1 id="home-title">今天吃什麼？</h1>
         <p>讓轉盤幫你決定。</p>
       </header>
 
+      <section class="account-panel" aria-label="Google 帳號">
+        <p class="guest-note" id="guest-note">
+          <span aria-hidden="true">💡</span>
+          登入後，收藏、黑名單與自製轉盤會跨裝置同步。
+        </p>
+      </section>
+
       <nav class="home-actions" aria-label="主要功能">
         <button class="button button-primary" type="button" data-go="filter">轉盤</button>
-        <button class="button button-outline" type="button" data-go="favorites">我的最愛</button>
-        <button class="button button-outline" type="button" data-go="blacklist">黑名單</button>
+        <button class="button button-outline" type="button" data-go="favorites">
+          我的最愛 <span class="home-count" id="favorites-count"></span>
+        </button>
+        <button class="button button-outline" type="button" data-go="blacklist">
+          黑名單 <span class="home-count" id="blacklist-count"></span>
+        </button>
         <button class="button button-outline" type="button" data-go="custom">自製轉盤</button>
       </nav>
 
       <p class="demo-note">目前使用示範資料，正式版餐廳資料會再接上 Google Map。</p>
+    </section>
+
+    <section class="scr login-screen" id="login" aria-labelledby="login-title">
+      <header class="screen-heading login-screen-heading">
+        <button class="back-button" type="button" data-go="home" aria-label="返回首頁">←</button>
+        <span class="login-back-label">返回</span>
+      </header>
+      <div class="login-card">
+        <h1 id="login-title">歡迎回來</h1>
+        <p class="login-intro" id="login-intro">登入後同步你的資料</p>
+
+        <div class="auth-tabs" role="tablist" aria-label="登入或註冊">
+          <button class="auth-tab is-active" id="login-tab" type="button" role="tab"
+            aria-selected="true" aria-controls="email-auth-form" data-auth-mode="login">登入</button>
+          <button class="auth-tab" id="register-tab" type="button" role="tab"
+            aria-selected="false" aria-controls="email-auth-form" data-auth-mode="register">註冊</button>
+        </div>
+
+        <form class="email-auth-form" id="email-auth-form">
+          <label for="auth-email">Email</label>
+          <input id="auth-email" name="email" type="email" autocomplete="email"
+            placeholder="name@example.com">
+          <label for="auth-password">密碼</label>
+          <div class="password-field">
+            <input id="auth-password" name="password" type="password"
+              autocomplete="current-password" placeholder="••••••••">
+            <button class="password-toggle" id="password-toggle" type="button"
+              aria-label="顯示密碼">顯示</button>
+          </div>
+          <button class="forgot-password" id="forgot-password" type="button">
+            忘記密碼？
+          </button>
+          <button class="button button-primary email-submit" id="email-auth-submit" type="submit">
+            登入
+          </button>
+        </form>
+
+        <p class="auth-unavailable">
+          Email／密碼登入尚未開放，目前請使用 Google 登入。
+        </p>
+        <div class="auth-divider"><span>或</span></div>
+        <div class="google-signin-wrap" id="google-signin-button"></div>
+        <button class="button button-outline guest-button" id="guest-button" type="button">
+          以訪客身分繼續
+        </button>
+        <p class="guest-login-note">訪客資料只會保存在這台裝置。</p>
+      </div>
     </section>
 
     <section class="scr filter-screen" id="filter" aria-labelledby="filter-title">
@@ -150,7 +233,7 @@
         <button class="back-button" type="button" data-go="home" aria-label="返回首頁">←</button>
         <h1 id="favorites-title">我的最愛</h1>
       </header>
-      <p class="page-intro">收藏的餐廳會保存在這台裝置的瀏覽器裡。</p>
+      <p class="page-intro">登入 Google 後會同步到你的帳號；未登入時保存在這台裝置。</p>
       <ul class="entry-list" id="favorites-list" aria-live="polite"></ul>
       <p class="empty-state hidden" id="favorites-empty">
         目前還沒有收藏的餐廳。完成轉盤與餐廳結果功能後，就能從結果頁加入最愛。
@@ -174,7 +257,7 @@
         <button class="back-button" type="button" data-go="home" aria-label="返回首頁">←</button>
         <h1 id="custom-title">自製轉盤</h1>
       </header>
-      <p class="page-intro">先新增轉盤類型，再把自己的餐廳放進類型裡。資料會保存在這台裝置。</p>
+      <p class="page-intro">先新增轉盤類型，再把自己的餐廳放進類型裡。登入後會同步到你的帳號。</p>
 
       <section class="form-card" aria-labelledby="category-title">
         <h2 id="category-title">自訂類型</h2>
@@ -232,5 +315,6 @@
   <script src="js/wheel.js"></script>
   <script src="js/custom.js"></script>
   <script src="js/lists.js"></script>
+  <script src="js/auth.js"></script>
 </body>
 </html>
