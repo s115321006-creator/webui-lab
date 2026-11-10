@@ -94,8 +94,39 @@
         </section>
       </div>
 
-      <button class="button button-primary start-button" type="button" data-coming-soon
-        data-message="篩選畫面已完成；轉盤會在下一階段實作。">開始轉</button>
+      <button class="button button-primary start-button" id="start-spin" type="button">開始轉</button>
+    </section>
+
+    <section class="scr wheel-screen" id="wheel" aria-labelledby="wheel-title">
+      <header class="screen-heading">
+        <button class="back-button" type="button" data-go="filter" aria-label="返回篩選">←</button>
+        <h1 id="wheel-title">轉盤</h1>
+      </header>
+      <p class="page-intro wheel-intro">轉盤停下來時，指針指到的就是今天的選擇！</p>
+
+      <div class="wheel-wrap">
+        <span class="wheel-pointer" aria-hidden="true"></span>
+        <svg class="wheel-graphic" id="wheel-graphic" viewBox="0 0 360 360"
+          role="img" aria-label="尚未開始的餐點轉盤"></svg>
+      </div>
+
+      <p class="wheel-result" id="wheel-result" aria-live="polite">準備好了嗎？</p>
+      <div class="wheel-result-actions hidden" id="wheel-result-actions">
+        <button class="button button-primary wheel-retry-button" id="spin-again" type="button">
+          不喜歡，重轉
+        </button>
+        <button class="button button-outline wheel-find-button" id="find-restaurants" type="button"
+          data-coming-soon data-message="附近餐廳查詢會在 Google Maps 功能接入後開放。">
+          喜歡，找餐廳
+        </button>
+      </div>
+      <button class="button button-outline wheel-filter-button" type="button" data-go="filter">
+        修改篩選條件
+      </button>
+      <p class="wheel-custom-link">
+        找不到想吃的？
+        <button class="text-link" type="button" data-go="custom">前往自製轉盤</button>
+      </p>
     </section>
 
     <section class="scr list-screen" id="favorites" aria-labelledby="favorites-title">
@@ -181,6 +212,7 @@
   <script src="js/core.js"></script>
   <script src="js/location.js"></script>
   <script src="js/filter.js"></script>
+  <script src="js/wheel.js"></script>
   <script src="js/custom.js"></script>
   <script src="js/lists.js"></script>
 </body>
