@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="theme-color" content="#edf3e9">
   <title>今天吃什麼？</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
@@ -62,20 +63,35 @@
             <label class="visually-hidden" for="city-select">縣市</label>
             <select id="city-select" name="city">
               <option value="">縣市</option>
-              <option value="臺北市">臺北市</option>
-              <option value="臺中市">臺中市</option>
-              <option value="高雄市">高雄市</option>
             </select>
             <label class="visually-hidden" for="dist-select">鄉鎮市區</label>
             <select id="dist-select" name="dist" disabled>
               <option value="">鄉鎮市區</option>
             </select>
           </div>
-          <button class="button button-outline locate-button" type="button" data-coming-soon
-            data-message="自動定位會在位置功能階段實作，目前可以先選縣市與行政區。">
+          <button class="button button-outline locate-button" id="locate-me" type="button">
             自動定位
           </button>
-          <p class="field-help">選擇縣市與行政區，或使用自動定位。</p>
+          <p class="field-help">可手動選擇全臺縣市與鄉鎮市區，或使用自動定位。</p>
+          <p class="field-help location-privacy">
+            使用自動定位時，座標會傳送至
+            <a href="https://www.openstreetmap.org/copyright" target="_blank" rel="noopener noreferrer">
+              OpenStreetMap Nominatim
+            </a>
+            查詢行政區，並向 OpenStreetMap 載入地圖圖磚；辨識結果依 OpenStreetMap 資料為準。
+          </p>
+          <p class="field-help" id="location-help" aria-live="polite"></p>
+          <section class="location-map-card hidden" id="location-map-card"
+            aria-labelledby="location-map-title">
+            <h3 id="location-map-title">目前位置</h3>
+            <p class="location-accuracy" id="location-accuracy" aria-live="polite"></p>
+            <div class="location-map" id="location-map"
+              role="region" aria-label="OpenStreetMap 目前位置與定位精度範圍"></div>
+            <p class="map-attribution">
+              地圖資料 © <a href="https://www.openstreetmap.org/copyright"
+                target="_blank" rel="noopener noreferrer">OpenStreetMap 貢獻者</a>
+            </p>
+          </section>
         </section>
 
         <section class="filter-card" aria-labelledby="range-title">
@@ -208,9 +224,10 @@
   <p class="toast hidden" id="toast" role="status" aria-live="polite"></p>
 
   <!-- JavaScript 依照相依順序載入；自製轉盤和清單功能放在共用函式之後。 -->
-  <script src="js/data.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="js/data.js?v=3"></script>
   <script src="js/core.js"></script>
-  <script src="js/location.js"></script>
+  <script src="js/location.js?v=3"></script>
   <script src="js/filter.js"></script>
   <script src="js/wheel.js"></script>
   <script src="js/custom.js"></script>
