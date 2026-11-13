@@ -196,6 +196,6 @@ def logout(response: Response) -> dict[str, bool]:
     return {"logged_out": True}
 
 
-app.mount("/css", StaticFiles(directory=ROOT_DIR / "site" / "css"), name="css")
-app.mount("/js", StaticFiles(directory=ROOT_DIR / "site" / "js"), name="js")
-app.mount("/", StaticFiles(directory=ROOT_DIR / "site", html=True), name="site")
+app.mount("/css", StaticFiles(directory="css"), name="css")
+app.mount("/js", StaticFiles(directory="js"), name="js")
+app.mount("/", StaticFiles(directory="html", html=True), name="site")
