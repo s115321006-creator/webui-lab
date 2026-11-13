@@ -75,20 +75,6 @@ select:focus-visible {
   margin-bottom: 20px;
 }
 
-.sync-indicator {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  margin-right: auto;
-  color: var(--muted);
-  font-size: 0.84rem;
-}
-
-.sync-check {
-  color: var(--green);
-  font-weight: 800;
-}
-
 .login-entry,
 .account-trigger {
   min-width: 46px;
@@ -138,8 +124,7 @@ select:focus-visible {
   font-weight: 700;
 }
 
-.account-menu-item,
-.account-sync-status {
+.account-menu-item {
   display: flex;
   width: 100%;
   min-height: 38px;
@@ -156,12 +141,6 @@ select:focus-visible {
 
 .account-menu-item:hover {
   background: var(--page-bg);
-}
-
-.account-sync-status strong {
-  margin-left: auto;
-  color: var(--green);
-  font-size: 0.8rem;
 }
 
 .home-heading {

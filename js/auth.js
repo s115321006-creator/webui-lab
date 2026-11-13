@@ -23,8 +23,6 @@ function renderGoogleButton() {
 function updateAccountUI() {
   var loginEntry = $('#login-entry');
   var accountTrigger = $('#account-trigger');
-  var syncIndicator = $('#sync-indicator');
-  var guestNote = $('#guest-note');
   var menuUser = $('#account-menu-user');
 
   if (currentUser) {
@@ -34,62 +32,20 @@ function updateAccountUI() {
     accountTrigger.setAttribute('aria-label', '開啟 ' +
       (currentUser.name || currentUser.email || 'Google 使用者') + ' 的帳號選單');
     menuUser.textContent = currentUser.email || currentUser.name || 'Google 使用者';
-    syncIndicator.classList.remove('hidden');
-    guestNote.classList.add('hidden');
   } else {
     loginEntry.classList.remove('hidden');
     accountTrigger.classList.add('hidden');
-    syncIndicator.classList.add('hidden');
-    guestNote.classList.remove('hidden');
   }
 }
 
-function refreshUserDataViews() {
-  renderCustomCategories();
-  renderCustomRestaurants();
-  renderSavedList('fav');
-  renderSavedList('bl');
-  WHEEL_OPTIONS = getWheelOptions();
-  renderWheel();
-}
-
-function clearLocalUserData() {
-  try {
-    localStorage.removeItem('foodDemo4');
-  } catch (error) {
-    console.error('清除本機使用者資料失敗。', error);
-    toast('無法清除這台裝置上的舊資料，請留意共用裝置的隱私。');
-  }
-}
-
-function updateAfterGoogleLogin(result, localData) {
-  currentUser = result.user;
-
-  if (result.exists) {
-    applyUserData(result.data);
-    clearLocalUserData();
-    refreshUserDataViews();
-    updateAccountUI();
-    go('home');
-    toast('已登入，並載入帳號中的資料。');
-    return Promise.resolve();
-  }
-
-  return queueCloudSave(localData).then(function () {
-    if (cloudSaveError) {
-      throw cloudSaveError;
-    }
-    clearLocalUserData();
-    refreshUserDataViews();
-    updateAccountUI();
-    go('home');
-    toast('已登入，並將這台裝置的資料儲存到帳號。');
-  });
+function updateAfterGoogleLogin(user) {
+  currentUser = user;
+  updateAccountUI();
+  go('home');
+  toast('已登入 Google 帳號；使用者資料仍保存在這台裝置。');
 }
 
 function handleGoogleCredential(googleResponse) {
-  var localData = JSON.parse(JSON.stringify(getUserDataSnapshot()));
-
   fetch('/api/auth/google', {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -103,7 +59,7 @@ function handleGoogleCredential(googleResponse) {
     }
     return response.json();
   }).then(function (result) {
-    return updateAfterGoogleLogin(result, localData);
+    updateAfterGoogleLogin(result.user);
   }).catch(function (error) {
     console.error('Google 登入失敗。', error);
     updateAccountUI();
@@ -151,43 +107,28 @@ function restoreSignedInUser() {
     }
     return response.json();
   }).then(function (result) {
-    var localData;
-
     if (!result || !result.user) {
       updateAccountUI();
       return;
     }
-    localData = JSON.parse(JSON.stringify(getUserDataSnapshot()));
-    return updateAfterGoogleLogin(result, localData);
+    updateAfterGoogleLogin(result.user);
   });
 }
 
 function signOut() {
-  var snapshot;
-
   if (!currentUser) {
     return;
   }
-  snapshot = getUserDataSnapshot();
-  queueCloudSave(snapshot).then(function () {
-    if (cloudSaveError) {
-      toast('同步失敗，請修復網路後再登出，以免遺失未同步的變更。');
-      return;
+  fetch('/api/auth/logout', {
+    method: 'POST',
+    credentials: 'same-origin'
+  }).then(function (response) {
+    if (!response.ok) {
+      throw new Error('登出失敗，請稍後再試。');
     }
-    return fetch('/api/auth/logout', {
-      method: 'POST',
-      credentials: 'same-origin'
-    }).then(function (response) {
-      if (!response.ok) {
-        throw new Error('登出失敗，請稍後再試。');
-      }
-      currentUser = null;
-      applyUserData({});
-      clearLocalUserData();
-      refreshUserDataViews();
-      updateAccountUI();
-      toast('已登出 Google 帳號。');
-    });
+    currentUser = null;
+    updateAccountUI();
+    toast('已登出 Google 帳號；本機資料仍保留。');
   }).catch(function (error) {
     console.error('登出失敗。', error);
     toast(error.message);
@@ -247,9 +188,7 @@ document.addEventListener('click', function (event) {
   $('#register-tab').setAttribute('aria-selected', mode === 'register' ? 'true' : 'false');
   $('#login-title').textContent = mode === 'login' ? '歡迎回來' : '建立帳號';
   $('#email-auth-submit').textContent = mode === 'login' ? '登入' : '註冊';
-  $('#login-intro').textContent = mode === 'login'
-    ? '登入後同步你的資料'
-    : '建立帳號後同步你的資料';
+  $('#login-intro').textContent = '登入 Google 帳號；使用者資料只保存在這台裝置。';
   $('#auth-password').setAttribute(
     'autocomplete',
     mode === 'login' ? 'current-password' : 'new-password'

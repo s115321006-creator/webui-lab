@@ -12,10 +12,6 @@
   <main class="app">
     <section class="scr home-screen on" id="home" aria-labelledby="home-title">
       <div class="home-account-bar">
-        <div class="sync-indicator hidden" id="sync-indicator" aria-live="polite">
-          <span class="sync-check" aria-hidden="true">✓</span>
-          <span>已同步</span>
-        </div>
         <div class="account-menu-wrap">
           <button class="account-trigger hidden" id="account-trigger" type="button"
             aria-label="開啟帳號選單" aria-expanded="false" aria-controls="account-menu"></button>
@@ -24,10 +20,6 @@
             <button type="button" class="account-menu-item" id="account-menu-profile">
               <span aria-hidden="true">●</span> 我的帳號
             </button>
-            <div class="account-sync-status">
-              <span aria-hidden="true">✓</span> 同步狀態
-              <strong>已同步</strong>
-            </div>
             <button type="button" class="account-menu-item" id="logout-button">
               <span aria-hidden="true">↪</span> 登出
             </button>
@@ -44,7 +36,7 @@
       <section class="account-panel" aria-label="Google 帳號">
         <p class="guest-note" id="guest-note">
           <span aria-hidden="true">💡</span>
-          登入後，收藏、黑名單與自製轉盤會跨裝置同步。
+          收藏、黑名單與自製轉盤只儲存在這個瀏覽器；清除瀏覽資料後可能會遺失。
         </p>
       </section>
 
@@ -69,7 +61,7 @@
       </header>
       <div class="login-card">
         <h1 id="login-title">歡迎回來</h1>
-        <p class="login-intro" id="login-intro">登入後同步你的資料</p>
+        <p class="login-intro" id="login-intro">登入 Google 帳號；使用者資料只保存在這台裝置。</p>
 
         <div class="auth-tabs" role="tablist" aria-label="登入或註冊">
           <button class="auth-tab is-active" id="login-tab" type="button" role="tab"
@@ -233,7 +225,7 @@
         <button class="back-button" type="button" data-go="home" aria-label="返回首頁">←</button>
         <h1 id="favorites-title">我的最愛</h1>
       </header>
-      <p class="page-intro">登入 Google 後會同步到你的帳號；未登入時保存在這台裝置。</p>
+      <p class="page-intro">最愛清單保存在這個瀏覽器，不會同步到其他裝置。</p>
       <ul class="entry-list" id="favorites-list" aria-live="polite"></ul>
       <p class="empty-state hidden" id="favorites-empty">
         目前還沒有收藏的餐廳。完成轉盤與餐廳結果功能後，就能從結果頁加入最愛。
@@ -257,7 +249,7 @@
         <button class="back-button" type="button" data-go="home" aria-label="返回首頁">←</button>
         <h1 id="custom-title">自製轉盤</h1>
       </header>
-      <p class="page-intro">先新增轉盤類型，再把自己的餐廳放進類型裡。登入後會同步到你的帳號。</p>
+      <p class="page-intro">先新增轉盤類型，再把自己的餐廳放進類型裡；資料保存在這個瀏覽器。</p>
 
       <section class="form-card" aria-labelledby="category-title">
         <h2 id="category-title">自訂類型</h2>

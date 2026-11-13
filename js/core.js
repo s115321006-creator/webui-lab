@@ -31,24 +31,6 @@ S.custR = Array.isArray(S.custR) ? S.custR : [];
 S.fav = Array.isArray(S.fav) ? S.fav : [];
 S.bl = Array.isArray(S.bl) ? S.bl : [];
 var currentUser = null;
-var cloudSaveQueue = Promise.resolve();
-var cloudSaveError = null;
-
-function getUserDataSnapshot() {
-  return {
-    cust: S.cust,
-    custR: S.custR,
-    fav: S.fav,
-    bl: S.bl
-  };
-}
-
-function applyUserData(data) {
-  S.cust = Array.isArray(data.cust) ? data.cust : [];
-  S.custR = Array.isArray(data.custR) ? data.custR : [];
-  S.fav = Array.isArray(data.fav) ? data.fav : [];
-  S.bl = Array.isArray(data.bl) ? data.bl : [];
-}
 
 function saveLocalState() {
   try {
@@ -59,43 +41,7 @@ function saveLocalState() {
   }
 }
 
-function saveCloudData(data) {
-  return fetch('/api/me/data', {
-    method: 'PUT',
-    headers: { 'Content-Type': 'application/json' },
-    credentials: 'same-origin',
-    body: JSON.stringify({ data: data })
-  }).then(function (response) {
-    if (!response.ok) {
-      return response.json().then(function (result) {
-        throw new Error(result.detail || '雲端儲存失敗。');
-      });
-    }
-  });
-}
-
-function queueCloudSave(data) {
-  var snapshot = JSON.parse(JSON.stringify(data));
-  var request = cloudSaveQueue.then(function () {
-    return saveCloudData(snapshot);
-  });
-
-  cloudSaveQueue = request.then(function () {
-    cloudSaveError = null;
-  }, function (error) {
-    cloudSaveError = error;
-    console.error('同步使用者資料失敗。', error);
-    toast('雲端同步失敗：' + error.message + ' 請保持登入後重試。');
-  });
-
-  return cloudSaveQueue;
-}
-
 function save() {
-  if (currentUser) {
-    queueCloudSave(getUserDataSnapshot());
-    return;
-  }
   saveLocalState();
 }
 
