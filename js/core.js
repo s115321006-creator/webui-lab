@@ -47,6 +47,7 @@ function save() {
 
 var F = {
   meat: 'all',
+  vegMode: 'include',
   stp: ['rice', 'noodle', 'other'],
   rng: 1000,
   city: '',

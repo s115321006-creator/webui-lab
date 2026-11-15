@@ -118,6 +118,15 @@
             <button class="choice" type="button" data-filter-group="meat"
               data-value="veg" aria-pressed="false">素食</button>
           </div>
+          <div class="vegetarian-mode-options hidden" id="vegetarian-mode-options">
+            <p class="field-help">素食餐廳範圍</p>
+            <div class="choice-list" role="group" aria-label="素食搜尋方式">
+              <button class="choice" type="button" data-filter-group="vegMode"
+                data-value="specialty" aria-pressed="false">只看素食專門店</button>
+              <button class="choice is-selected" type="button" data-filter-group="vegMode"
+                data-value="include" aria-pressed="true">包含有素食選項的店</button>
+            </div>
+          </div>
         </section>
 
         <section class="filter-card" aria-labelledby="staple-title">
@@ -274,6 +283,12 @@
       <p class="empty-state hidden" id="restaurant-empty" role="status">
         目前範圍內找不到符合條件的餐廳。
       </p>
+      <section class="empty-state hidden" id="restaurant-veg-fallback" role="status">
+        <p id="restaurant-veg-fallback-message"></p>
+        <button class="button button-outline" id="restaurant-veg-switch" type="button">
+          切換搜尋方式
+        </button>
+      </section>
       <p class="empty-state hidden" id="restaurant-filter-empty" role="status">
         目前結果沒有已收藏的餐廳。
       </p>

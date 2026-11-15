@@ -12,8 +12,24 @@ function selectSingleChoice(group, value, clickedButton) {
 
   if (group === 'meat') {
     F.meat = value;
+    setHidden('vegetarian-mode-options', value !== 'veg');
   } else if (group === 'rng') {
     F.rng = Number(value);
+  } else if (group === 'vegMode') {
+    F.vegMode = value;
+  }
+}
+
+function setVegetarianModeSelection(value) {
+  var buttons = document.querySelectorAll('[data-filter-group="vegMode"]');
+  var i;
+  var selected;
+
+  F.vegMode = value;
+  for (i = 0; i < buttons.length; i += 1) {
+    selected = buttons[i].getAttribute('data-value') === value;
+    buttons[i].classList.toggle('is-selected', selected);
+    buttons[i].setAttribute('aria-pressed', String(selected));
   }
 }
 
@@ -56,3 +72,5 @@ document.addEventListener('click', function (event) {
     selectSingleChoice(group, value, button);
   }
 });
+
+setHidden('vegetarian-mode-options', F.meat !== 'veg');

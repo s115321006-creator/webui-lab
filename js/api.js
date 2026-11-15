@@ -11,7 +11,8 @@ function fetchRestaurantsAtRadius(options, radius) {
     lat: String(options.lat),
     lng: String(options.lng),
     radius: String(radius),
-    veg: options.vegOnly ? '1' : '0'
+    veg: options.vegOnly ? '1' : '0',
+    vegMode: options.vegMode || 'include'
   });
 
   return fetch('/api/restaurants?' + params.toString(), {

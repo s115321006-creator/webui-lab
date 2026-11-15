@@ -40,7 +40,8 @@ PLACES_RATE_LIMIT = 30
 PLACES_RATE_WINDOW_SECONDS = 60
 GOOGLE_FIELD_MASK = (
     "places.id,places.displayName,places.location,places.formattedAddress,"
-    "places.rating,places.userRatingCount,places.types,places.businessStatus"
+    "places.rating,places.userRatingCount,places.types,places.businessStatus,"
+    "places.servesVegetarianFood"
 )
 OVERPASS_ENDPOINT = "https://overpass-api.de/api/interpreter"
 OVERPASS_USER_AGENT = "webui-lab-restaurant-search/1.0"
@@ -66,7 +67,8 @@ def parse_search_parameters(
     lng: str | None,
     radius: str | None,
     veg: str | None,
-) -> tuple[dict[str, Any], float, float, int, bool]:
+    veg_mode: str | None = None,
+) -> tuple[dict[str, Any], float, float, int, bool, str]:
     """把網址參數檢查成安全、可計算的搜尋條件。"""
     if category not in CATEGORIES_BY_NAME:
         raise HTTPException(status_code=400, detail="餐廳分類不存在。")
@@ -91,10 +93,19 @@ def parse_search_parameters(
         raise HTTPException(status_code=400, detail="搜尋半徑必須介於 100 到 10000 公尺。")
     if veg not in {"0", "1"}:
         raise HTTPException(status_code=400, detail="素食篩選只能是 0 或 1。")
+    if veg_mode is not None and veg_mode not in {"specialty", "include"}:
+        raise HTTPException(status_code=400, detail="素食搜尋方式不正確。")
 
     category_config = CATEGORIES_BY_NAME[category]
     vegetarian_only = veg == "1" or bool(category_config.get("vegetarianOnly"))
-    return category_config, latitude, longitude, search_radius, vegetarian_only
+    return (
+        category_config,
+        latitude,
+        longitude,
+        search_radius,
+        vegetarian_only,
+        veg_mode or "include",
+    )
 
 
 def is_rate_limited(client_ip: str, now: float) -> bool:
@@ -154,6 +165,7 @@ def normalized_restaurant(
     search_longitude: float,
     address: str,
     is_vegetarian: bool | None,
+    veg_level: str = "unknown",
     rating: float | None = None,
     rating_count: int | None = None,
 ) -> dict[str, Any]:
@@ -168,11 +180,34 @@ def normalized_restaurant(
             search_latitude, search_longitude, latitude, longitude
         )),
         "isVeg": is_vegetarian,
+        "vegLevel": veg_level,
         "address": address,
         "rating": rating,
         "ratingCount": rating_count,
         "mapUrl": build_map_url(name, place_id, address),
     }
+
+
+def classify_vegetarian_level(
+    name: str,
+    types: list[str],
+    serves_vegetarian_food: bool | None,
+) -> str:
+    """依餐廳類型、名稱和供應資訊統一判斷素食程度。"""
+    normalized_name = name.casefold()
+    has_specialty_name = any(
+        word.casefold() in normalized_name
+        for word in ("素", "蔬", "Vegan", "Veggie")
+    )
+    if (
+        "vegetarian_restaurant" in types
+        or "vegan_restaurant" in types
+        or has_specialty_name
+    ):
+        return "specialty"
+    if serves_vegetarian_food is True:
+        return "friendly"
+    return "unknown"
 
 
 def request_json(url: str, payload: dict[str, Any], headers: dict[str, str]) -> Any:
@@ -209,16 +244,14 @@ def search_google_places(
     longitude: float,
     radius: int,
     vegetarian_only: bool,
+    veg_mode: str,
 ) -> list[dict[str, Any]]:
     """呼叫 Google Places (New)，只挑選需要的欄位並略過歇業店家。"""
     if not GOOGLE_PLACES_API_KEY:
         raise HTTPException(status_code=503, detail="Google 餐廳搜尋尚未設定 API Key。")
 
-    query = category["query"]
-    if vegetarian_only:
-        query += " 素食"
     payload = {
-        "textQuery": query,
+        "textQuery": category["query"],
         "locationBias": {
             "circle": {
                 "center": {"latitude": latitude, "longitude": longitude},
@@ -267,9 +300,6 @@ def search_google_places(
         types = place.get("types") or []
         if not isinstance(types, list):
             raise PlacesProviderError("InvalidResponse")
-        is_vegetarian = True if "vegetarian_restaurant" in types else None
-        if vegetarian_only and not is_vegetarian:
-            continue
         location = place.get("location") or {}
         display_name = place.get("displayName") or {}
         if not isinstance(location, dict) or not isinstance(display_name, dict):
@@ -292,6 +322,14 @@ def search_google_places(
             continue
         if not isinstance(name, str):
             continue
+        serves_vegetarian_food = place.get("servesVegetarianFood")
+        if vegetarian_only and serves_vegetarian_food is False:
+            continue
+        veg_level = classify_vegetarian_level(
+            name, types, serves_vegetarian_food
+        )
+        if vegetarian_only and veg_mode == "specialty" and veg_level != "specialty":
+            continue
         if haversine_distance_meters(
             latitude, longitude, float(place_latitude), float(place_longitude)
         ) > radius:
@@ -305,14 +343,15 @@ def search_google_places(
             latitude,
             longitude,
             str(place.get("formattedAddress") or ""),
-            is_vegetarian,
-            (
+            True if veg_level in {"specialty", "friendly"} else None,
+            veg_level,
+            rating=(
                 float(place["rating"])
                 if isinstance(place.get("rating"), (int, float))
                 and math.isfinite(float(place["rating"]))
                 else None
             ),
-            (
+            rating_count=(
                 int(place["userRatingCount"])
                 if isinstance(place.get("userRatingCount"), int)
                 and place["userRatingCount"] >= 0
@@ -328,6 +367,7 @@ def search_openstreetmap(
     longitude: float,
     radius: int,
     vegetarian_only: bool,
+    veg_mode: str,
 ) -> list[dict[str, Any]]:
     """透過 Overpass 搜尋附近餐廳節點，並按分類和素食標籤篩選。"""
     query = (
@@ -362,14 +402,24 @@ def search_openstreetmap(
         }
         if cuisine_filter and not cuisine_filter.intersection(cuisines):
             continue
-        is_vegetarian = (
-            True
-            if tags.get("diet:vegetarian") == "yes" or tags.get("diet:vegan") == "yes"
-            else False
-            if tags.get("diet:vegetarian") == "no" or tags.get("diet:vegan") == "no"
-            else None
+        diet_vegetarian = tags.get("diet:vegetarian")
+        diet_vegan = tags.get("diet:vegan")
+        is_explicitly_non_vegetarian = (
+            diet_vegetarian == "no" or diet_vegan == "no"
         )
-        if vegetarian_only and is_vegetarian is not True:
+        if vegetarian_only and is_explicitly_non_vegetarian:
+            continue
+        types = (
+            ["vegetarian_restaurant"]
+            if cuisines.intersection({"vegetarian", "vegan"})
+            else []
+        )
+        veg_level = classify_vegetarian_level(
+            str(tags.get("name") or ""),
+            types,
+            diet_vegetarian == "yes" or diet_vegan == "yes",
+        )
+        if vegetarian_only and veg_mode == "specialty" and veg_level != "specialty":
             continue
         try:
             place_latitude = float(element["lat"])
@@ -401,7 +451,8 @@ def search_openstreetmap(
             latitude,
             longitude,
             address,
-            is_vegetarian,
+            True if veg_level in {"specialty", "friendly"} else None,
+            veg_level,
         ))
     return sorted(results, key=lambda restaurant: restaurant["distance"])[:20]
 
@@ -414,14 +465,22 @@ def get_restaurants(
     lng: str | None = None,
     radius: str | None = None,
     veg: str | None = None,
+    vegMode: str | None = None,
 ) -> dict[str, Any]:
     """驗證搜尋條件、限流、查快取，再呼叫目前選定的資料來源。"""
     client_ip = request.client.host if request.client else "unknown"
     if is_rate_limited(client_ip, time.monotonic()):
         raise HTTPException(status_code=429, detail="搜尋次數已達上限，請稍後再試。")
 
-    category_config, latitude, longitude, search_radius, vegetarian_only = (
-        parse_search_parameters(category, lat, lng, radius, veg)
+    (
+        category_config,
+        latitude,
+        longitude,
+        search_radius,
+        vegetarian_only,
+        vegetarian_mode,
+    ) = (
+        parse_search_parameters(category, lat, lng, radius, veg, vegMode)
     )
     cache_key = (
         category_config["name"],
@@ -429,6 +488,7 @@ def get_restaurants(
         round(longitude, 3),
         search_radius,
         vegetarian_only,
+        vegetarian_mode if vegetarian_only else "not-vegetarian-search",
     )
     now = time.monotonic()
     with places_cache_lock:
@@ -446,11 +506,21 @@ def get_restaurants(
     try:
         if PLACES_PROVIDER == "google":
             restaurants = search_google_places(
-                category_config, latitude, longitude, search_radius, vegetarian_only
+                category_config,
+                latitude,
+                longitude,
+                search_radius,
+                vegetarian_only,
+                vegetarian_mode,
             )
         else:
             restaurants = search_openstreetmap(
-                category_config, latitude, longitude, search_radius, vegetarian_only
+                category_config,
+                latitude,
+                longitude,
+                search_radius,
+                vegetarian_only,
+                vegetarian_mode,
             )
     except HTTPException:
         raise

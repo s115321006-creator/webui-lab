@@ -14,6 +14,8 @@ Google 登入使用 Google Identity Services，不需要在前端或 `.env` 放�
 
 餐廳搜尋由瀏覽器呼叫本站 `/api/restaurants`，再由後端依 `PLACES_PROVIDER` 查詢 Google Places API (New) 或 OpenStreetMap Overpass。Google Places API Key 只能設定在後端 `.env`，不可放進前端檔案。
 
+素食篩選預設包含有素食選項的餐廳；也可切換成只看素食專門店。Places 未提供素食資訊時仍會列出，並標示需要先向店家確認。
+
 自動定位會使用裝置座標；手動選擇行政區時，若該區沒有獨立中心座標，搜尋會以縣市中心近似並在結果頁提示。
 
 ## 使用者資料

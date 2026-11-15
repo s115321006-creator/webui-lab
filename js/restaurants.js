@@ -8,6 +8,7 @@ var restaurantSortMode = 'distance';
 var restaurantFavoritesOnly = false;
 var restaurantMap = null;
 var restaurantMapTiles = null;
+var alternateVegetarianSearch = null;
 
 function setRestaurantSearchState(state, message) {
   // 只切換 HTML 元件的顯示狀態，外觀統一交給 CSS。
@@ -57,6 +58,7 @@ function localRestaurantsForCategory(category, vegOnly) {
       lng: null,
       distance: null,
       isVeg: restaurant.vegetarian ? true : null,
+      vegLevel: restaurant.vegetarian ? 'friendly' : 'unknown',
       address: restaurant.address,
       rating: null,
       ratingCount: null,
@@ -146,7 +148,7 @@ function renderRestaurantCard(restaurant) {
   if (Number.isFinite(distance)) {
     appendTextElement(travelTimes, 'span', 'restaurant-time restaurant-time-walk', '🚶 ' +
       Math.ceil(distance / 67) + ' 分');
-    appendTextElement(travelTimes, 'span', 'restaurant-time restaurant-time-bike', '🚴 ' +
+    appendTextElement(travelTimes, 'span', 'restaurant-time restaurant-time-bike', '🛵 ' +
       Math.ceil(distance / 250) + ' 分');
     appendTextElement(travelTimes, 'span', 'restaurant-time restaurant-time-drive', '🚗 ' +
       Math.ceil(distance / 500) + ' 分');
@@ -158,8 +160,13 @@ function renderRestaurantCard(restaurant) {
   tags = document.createElement('div');
   tags.className = 'restaurant-tags';
   appendTextElement(tags, 'span', 'restaurant-tag', restaurant.category || '附近餐廳');
-  if (restaurant.isVeg === true) {
-    appendTextElement(tags, 'span', 'restaurant-tag', '素食資訊');
+  if (restaurant.vegLevel === 'specialty') {
+    appendTextElement(tags, 'span', 'restaurant-tag', '素食專門店');
+  } else if (restaurant.vegLevel === 'friendly') {
+    appendTextElement(tags, 'span', 'restaurant-tag', '有素食選項');
+  } else {
+    appendTextElement(tags, 'span', 'restaurant-tag',
+      '素食資訊未確認，建議先電話確認');
   }
   item.appendChild(tags);
 
@@ -241,6 +248,14 @@ function renderRestaurantResults() {
     restaurants = restaurants.filter(isRestaurantFavorite);
   }
   restaurants.sort(function (a, b) {
+    if (lastRestaurantSearch && lastRestaurantSearch.vegOnly) {
+      var vegRank = { specialty: 0, friendly: 1, unknown: 2 };
+      var vegDifference = (vegRank[a.vegLevel] === undefined ? 2 : vegRank[a.vegLevel]) -
+        (vegRank[b.vegLevel] === undefined ? 2 : vegRank[b.vegLevel]);
+      if (vegDifference) {
+        return vegDifference;
+      }
+    }
     if (restaurantSortMode === 'rating') {
       if (Number.isFinite(a.rating) && Number.isFinite(b.rating)) {
         return b.rating - a.rating ||
@@ -279,6 +294,9 @@ function renderRestaurantResults() {
       : (restaurantUsedRadius || F.rng) + ' 公尺');
   setHidden('restaurant-filter-empty',
     !(restaurantFavoritesOnly && !restaurants.length));
+  if (restaurants.length) {
+    setHidden('restaurant-veg-fallback', true);
+  }
   setHidden('restaurant-empty',
     restaurantFavoritesOnly || restaurants.length > 0);
   setHidden('restaurant-list', !restaurants.length);
@@ -295,6 +313,9 @@ function runRestaurantSearch() {
   var location = getSelectedSearchLocation();
   var vegOnly;
   var options;
+  var localRestaurants;
+  var alternateOptions;
+  var alternateMode;
 
   if (restaurantSearchInProgress) {
     return;
@@ -314,12 +335,15 @@ function runRestaurantSearch() {
     lat: location.lat,
     lng: location.lng,
     radius: F.rng,
-    vegOnly: vegOnly
+    vegOnly: vegOnly,
+    vegMode: vegOnly ? F.vegMode : 'include'
   };
   lastRestaurantSearch = options;
+  alternateVegetarianSearch = null;
   restaurantSearchInProgress = true;
   setRestaurantSearchState('loading');
   setHidden('restaurant-filter-empty', true);
+  setHidden('restaurant-veg-fallback', true);
   setHidden('restaurant-map-open', true);
   setHidden('restaurant-location-note', !location.approximate);
   setHidden('restaurant-radius-notice', true);
@@ -330,12 +354,42 @@ function runRestaurantSearch() {
   go('restaurants');
 
   searchRestaurants(options).then(function (result) {
-    var localRestaurants = localRestaurantsForCategory(category.label, vegOnly);
-
+    localRestaurants = localRestaurantsForCategory(category.label, vegOnly);
     restaurantResults = result.restaurants.concat(localRestaurants);
     restaurantUsedRadius = result.usedRadius;
     updateRadiusNotice(result);
     renderRestaurantResults();
+
+    if (F.meat !== 'veg' || restaurantResults.some(function (restaurant) {
+      return !isRestaurantBlacklisted(restaurant);
+    })) {
+      return;
+    }
+
+    alternateMode = options.vegMode === 'specialty' ? 'include' : 'specialty';
+    alternateOptions = Object.assign({}, options, { vegMode: alternateMode });
+    searchRestaurants(alternateOptions).then(function (alternateResult) {
+      var alternativeRestaurants = alternateResult.restaurants.concat(localRestaurants);
+      if (!alternativeRestaurants.some(function (restaurant) {
+        return !isRestaurantBlacklisted(restaurant);
+      })) {
+        return;
+      }
+
+      alternateVegetarianSearch = {
+        options: alternateOptions,
+        result: alternateResult,
+        category: category.label,
+        vegOnly: vegOnly
+      };
+      $('#restaurant-veg-fallback-message').textContent =
+        options.vegMode === 'specialty'
+          ? '附近找不到素食專門店；改為包含有素食選項的店後可以找到餐廳。'
+          : '附近找不到有素食選項的店；只看素食專門店後可以找到餐廳。';
+      setHidden('restaurant-veg-fallback', false);
+    }).catch(function (error) {
+      console.warn('查詢另一種素食搜尋方式失敗。', error);
+    });
   }).catch(function (error) {
     var message = error.message || '餐廳搜尋失敗，請稍後重試。';
     console.error('餐廳搜尋失敗，HTTP 狀態：' + (error.status || 'network'));
@@ -351,6 +405,26 @@ $('#restaurant-retry').addEventListener('click', function () {
   if (lastRestaurantSearch && selectedWheelCategory) {
     runRestaurantSearch();
   }
+});
+
+$('#restaurant-veg-switch').addEventListener('click', function () {
+  if (!alternateVegetarianSearch) {
+    return;
+  }
+
+  setVegetarianModeSelection(alternateVegetarianSearch.options.vegMode);
+  lastRestaurantSearch = alternateVegetarianSearch.options;
+  restaurantResults = alternateVegetarianSearch.result.restaurants.concat(
+    localRestaurantsForCategory(
+      alternateVegetarianSearch.category,
+      alternateVegetarianSearch.vegOnly
+    )
+  );
+  restaurantUsedRadius = alternateVegetarianSearch.result.usedRadius;
+  updateRadiusNotice(alternateVegetarianSearch.result);
+  setHidden('restaurant-veg-fallback', true);
+  alternateVegetarianSearch = null;
+  renderRestaurantResults();
 });
 
 $('#restaurant-sort-distance').addEventListener('click', function () {
