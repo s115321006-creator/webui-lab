@@ -51,7 +51,7 @@
         <button class="button button-outline" type="button" data-go="custom">自製轉盤</button>
       </nav>
 
-      <p class="demo-note">目前使用示範資料，正式版餐廳資料會再接上 Google Map。</p>
+      <p class="demo-note">餐廳資料會透過後端向地圖服務查詢。</p>
     </section>
 
     <section class="scr login-screen" id="login" aria-labelledby="login-title">
@@ -155,6 +155,7 @@
             </a>
             查詢行政區，並向 OpenStreetMap 載入地圖圖磚；辨識結果依 OpenStreetMap 資料為準。
           </p>
+          <p class="field-help">搜尋時，你的大概位置會傳送給地圖服務以找出附近餐廳。</p>
           <p class="field-help" id="location-help" aria-live="polite"></p>
           <section class="location-map-card hidden" id="location-map-card"
             aria-labelledby="location-map-title">
@@ -180,6 +181,8 @@
               data-value="3000" aria-pressed="false">3 公里</button>
             <button class="choice" type="button" data-filter-group="rng"
               data-value="5000" aria-pressed="false">5 公里</button>
+            <button class="choice" type="button" data-filter-group="rng"
+              data-value="10000" aria-pressed="false">10 公里</button>
           </div>
           <p class="field-help">範圍內若找不到餐廳，會自動幫你擴大範圍。</p>
         </section>
@@ -206,8 +209,7 @@
         <button class="button button-primary wheel-retry-button" id="spin-again" type="button">
           不喜歡，重轉
         </button>
-        <button class="button button-outline wheel-find-button" id="find-restaurants" type="button"
-          data-coming-soon data-message="附近餐廳查詢會在 Google Maps 功能接入後開放。">
+        <button class="button button-outline wheel-find-button" id="find-restaurants" type="button">
           喜歡，找餐廳
         </button>
       </div>
@@ -220,6 +222,83 @@
       </p>
     </section>
 
+    <section class="scr restaurant-screen" id="restaurants" aria-labelledby="restaurants-title">
+      <header class="restaurant-heading">
+        <button class="back-button" type="button" data-go="wheel" aria-label="返回轉盤">←</button>
+        <div>
+          <h1 id="restaurants-title">附近餐廳</h1>
+          <p id="restaurant-search-summary">正在整理搜尋條件…</p>
+        </div>
+      </header>
+      <p class="page-intro location-approximation hidden" id="restaurant-location-note">
+        未提供這個行政區的中心座標，搜尋位置以縣市中心近似。
+      </p>
+      <p class="restaurant-radius-notice hidden" id="restaurant-radius-notice" role="status"></p>
+      <nav class="restaurant-controls" aria-label="餐廳排序與篩選">
+        <button class="restaurant-chip is-selected" id="restaurant-sort-distance"
+          type="button" aria-pressed="true">最近</button>
+        <button class="restaurant-chip" id="restaurant-sort-rating"
+          type="button" aria-pressed="false">評分最高</button>
+        <button class="restaurant-chip" id="restaurant-filter-open"
+          type="button" aria-pressed="false" disabled
+          title="目前的餐廳資料沒有即時營業狀態"
+          aria-label="營業中，資料未提供即時營業狀態">營業中</button>
+        <button class="restaurant-chip" id="restaurant-filter-favorites"
+          type="button" aria-pressed="false">♥ 已收藏</button>
+      </nav>
+      <section class="restaurant-loading hidden" id="restaurant-loading"
+        aria-label="正在載入餐廳" aria-live="polite">
+        <p class="page-intro">正在搜尋附近餐廳…</p>
+        <ul class="entry-list" aria-hidden="true">
+          <li class="entry-card restaurant-skeleton-card">
+            <span class="skeleton-line skeleton-title"></span>
+            <span class="skeleton-line skeleton-copy"></span>
+            <span class="skeleton-line skeleton-copy short"></span>
+          </li>
+          <li class="entry-card restaurant-skeleton-card">
+            <span class="skeleton-line skeleton-title"></span>
+            <span class="skeleton-line skeleton-copy"></span>
+            <span class="skeleton-line skeleton-copy short"></span>
+          </li>
+          <li class="entry-card restaurant-skeleton-card">
+            <span class="skeleton-line skeleton-title"></span>
+            <span class="skeleton-line skeleton-copy"></span>
+            <span class="skeleton-line skeleton-copy short"></span>
+          </li>
+        </ul>
+      </section>
+      <section class="empty-state hidden" id="restaurant-error" role="alert">
+        <p id="restaurant-error-message">餐廳搜尋失敗，請重試。</p>
+        <button class="button button-outline" id="restaurant-retry" type="button">重試</button>
+      </section>
+      <p class="empty-state hidden" id="restaurant-empty" role="status">
+        目前範圍內找不到符合條件的餐廳。
+      </p>
+      <p class="empty-state hidden" id="restaurant-filter-empty" role="status">
+        目前結果沒有已收藏的餐廳。
+      </p>
+      <ul class="entry-list hidden" id="restaurant-list" aria-live="polite"></ul>
+      <button class="restaurant-map-button" id="restaurant-map-open" type="button">
+        查看地圖 <span id="restaurant-map-count">0 家</span>
+      </button>
+      <section class="restaurant-map-dialog hidden" id="restaurant-map-dialog"
+        role="dialog" aria-modal="true" aria-labelledby="restaurant-map-title">
+        <div class="restaurant-map-panel">
+          <header class="restaurant-map-heading">
+            <h2 id="restaurant-map-title">附近餐廳地圖</h2>
+            <button class="restaurant-map-close" id="restaurant-map-close"
+              type="button" aria-label="關閉地圖">×</button>
+          </header>
+          <div class="restaurant-map-canvas" id="restaurant-map-canvas"
+            aria-label="附近餐廳位置地圖"></div>
+          <p class="restaurant-map-attribution">
+            地圖資料 © <a href="https://www.openstreetmap.org/copyright"
+              target="_blank" rel="noopener noreferrer">OpenStreetMap contributors</a>
+          </p>
+        </div>
+      </section>
+    </section>
+
     <section class="scr list-screen" id="favorites" aria-labelledby="favorites-title">
       <header class="screen-heading">
         <button class="back-button" type="button" data-go="home" aria-label="返回首頁">←</button>
@@ -228,7 +307,7 @@
       <p class="page-intro">最愛清單保存在這個瀏覽器，不會同步到其他裝置。</p>
       <ul class="entry-list" id="favorites-list" aria-live="polite"></ul>
       <p class="empty-state hidden" id="favorites-empty">
-        目前還沒有收藏的餐廳。完成轉盤與餐廳結果功能後，就能從結果頁加入最愛。
+        目前還沒有收藏的餐廳。可以在附近餐廳結果中按下愛心收藏。
       </p>
     </section>
 
@@ -240,7 +319,7 @@
       <p class="page-intro">加入黑名單的餐廳會從之後的抽選結果中排除。</p>
       <ul class="entry-list" id="blacklist-list" aria-live="polite"></ul>
       <p class="empty-state hidden" id="blacklist-empty">
-        黑名單目前是空的。餐廳結果功能完成後，就能從結果頁加入黑名單。
+        黑名單目前是空的。可以在附近餐廳結果中將不想再看到的店家加入黑名單。
       </p>
     </section>
 
@@ -305,6 +384,8 @@
   <script src="js/location.js?v=3"></script>
   <script src="js/filter.js"></script>
   <script src="js/wheel.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/restaurants.js"></script>
   <script src="js/custom.js"></script>
   <script src="js/lists.js"></script>
   <script src="js/auth.js"></script>

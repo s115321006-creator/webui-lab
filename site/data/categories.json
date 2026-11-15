@@ -1,0 +1,183 @@
+[
+  {
+    "name": "台式",
+    "query": "台式料理 台灣小吃",
+    "osmCuisine": ["taiwanese"],
+    "googleTypes": ["taiwanese_restaurant"],
+    "color": "#e83b2d",
+    "staples": ["rice", "noodle", "other"],
+    "vegetarian": true
+  },
+  {
+    "name": "日式",
+    "query": "日式料理 壽司 拉麵",
+    "osmCuisine": ["japanese", "sushi", "ramen"],
+    "googleTypes": ["japanese_restaurant"],
+    "color": "#2da160",
+    "staples": ["rice", "noodle", "other"],
+    "vegetarian": true
+  },
+  {
+    "name": "韓式",
+    "query": "韓式料理 韓式燒肉",
+    "osmCuisine": ["korean", "korean_bbq"],
+    "googleTypes": ["korean_restaurant"],
+    "color": "#7050a1",
+    "staples": ["rice", "noodle", "other"],
+    "vegetarian": true
+  },
+  {
+    "name": "義式",
+    "query": "義式料理 義大利麵 披薩",
+    "osmCuisine": ["italian", "pizza", "pasta"],
+    "googleTypes": ["italian_restaurant"],
+    "color": "#f5b82e",
+    "staples": ["rice", "noodle", "other"],
+    "vegetarian": true
+  },
+  {
+    "name": "美式",
+    "query": "美式料理 漢堡",
+    "osmCuisine": ["american", "burger", "hot_dog"],
+    "googleTypes": ["american_restaurant"],
+    "color": "#e83b2d",
+    "staples": ["other"],
+    "vegetarian": true
+  },
+  {
+    "name": "泰式",
+    "query": "泰式料理",
+    "osmCuisine": ["thai"],
+    "googleTypes": ["thai_restaurant"],
+    "color": "#2da160",
+    "staples": ["rice", "noodle"],
+    "vegetarian": true
+  },
+  {
+    "name": "越式",
+    "query": "越南料理 河粉",
+    "osmCuisine": ["vietnamese", "pho"],
+    "googleTypes": ["vietnamese_restaurant"],
+    "color": "#7050a1",
+    "staples": ["rice", "noodle", "other"]
+  },
+  {
+    "name": "港式",
+    "query": "港式料理 港式飲茶 點心",
+    "osmCuisine": ["cantonese", "dim_sum"],
+    "googleTypes": ["chinese_restaurant"],
+    "color": "#f5b82e",
+    "staples": ["rice", "noodle", "other"],
+    "vegetarian": true
+  },
+  {
+    "name": "火鍋",
+    "query": "火鍋",
+    "osmCuisine": ["hot_pot"],
+    "googleTypes": [],
+    "color": "#e83b2d",
+    "staples": ["rice", "noodle", "other"],
+    "vegetarian": true
+  },
+  {
+    "name": "燒烤",
+    "query": "燒烤 烤肉",
+    "osmCuisine": ["barbecue", "grill", "korean_bbq"],
+    "googleTypes": ["barbecue_restaurant"],
+    "color": "#2da160",
+    "staples": ["rice", "other"],
+    "vegetarian": true
+  },
+  {
+    "name": "速食",
+    "query": "速食 漢堡 炸雞",
+    "osmCuisine": ["burger", "pizza", "fried_chicken"],
+    "googleTypes": ["fast_food_restaurant"],
+    "color": "#7050a1",
+    "staples": ["other"],
+    "vegetarian": true
+  },
+  {
+    "name": "鹽酥雞",
+    "query": "鹽酥雞 炸物",
+    "osmCuisine": ["taiwanese", "fried_chicken", "chicken"],
+    "googleTypes": [],
+    "color": "#f5b82e",
+    "staples": ["other"],
+    "vegetarian": true
+  },
+  {
+    "name": "滷味",
+    "query": "滷味",
+    "osmCuisine": ["taiwanese", "noodles"],
+    "googleTypes": [],
+    "color": "#e83b2d",
+    "staples": ["rice", "noodle", "other"],
+    "vegetarian": true
+  },
+  {
+    "name": "健康餐",
+    "query": "健康餐盒 沙拉",
+    "osmCuisine": ["salad", "health_food"],
+    "googleTypes": [],
+    "color": "#2da160",
+    "staples": ["rice", "other"],
+    "vegetarian": true
+  },
+  {
+    "name": "超商",
+    "query": "便利超商 便利商店 超商",
+    "osmCuisine": ["convenience", "snack"],
+    "googleTypes": [],
+    "color": "#7050a1",
+    "staples": ["rice", "noodle", "other"],
+    "vegetarian": true
+  },
+  {
+    "name": "蔬食料理",
+    "query": "蔬食料理 素食餐廳",
+    "osmCuisine": ["vegetarian", "vegan"],
+    "googleTypes": ["vegetarian_restaurant"],
+    "color": "#f5b82e",
+    "staples": ["rice", "noodle", "other"],
+    "vegetarian": true,
+    "meatOnly": true,
+    "vegetarianOnly": true
+  },
+  {
+    "name": "中式",
+    "query": "中式料理",
+    "osmCuisine": ["chinese", "regional", "noodles"],
+    "googleTypes": ["chinese_restaurant"],
+    "color": "#e83b2d",
+    "staples": ["rice", "noodle", "other"],
+    "vegetarian": true
+  },
+  {
+    "name": "咖哩",
+    "query": "咖哩 印度咖哩 日式咖哩",
+    "osmCuisine": ["curry", "indian", "japanese_curry"],
+    "googleTypes": ["indian_restaurant"],
+    "color": "#2da160",
+    "staples": ["rice", "noodle"],
+    "vegetarian": true
+  },
+  {
+    "name": "早午餐",
+    "query": "早午餐 早餐",
+    "osmCuisine": ["breakfast", "brunch", "sandwich"],
+    "googleTypes": ["brunch_restaurant"],
+    "color": "#7050a1",
+    "staples": ["other"],
+    "vegetarian": true
+  },
+  {
+    "name": "其他",
+    "query": "餐廳 小吃",
+    "osmCuisine": [],
+    "googleTypes": [],
+    "color": "#f5b82e",
+    "staples": ["rice", "noodle", "other"],
+    "vegetarian": true
+  }
+]

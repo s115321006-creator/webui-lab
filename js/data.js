@@ -46,3 +46,68 @@ var TW = {
   '臺東縣': '臺東市 綠島鄉 蘭嶼鄉 延平鄉 卑南鄉 鹿野鄉 關山鎮 海端鄉 池上鄉 東河鄉 成功鎮 長濱鄉 太麻里鄉 金峰鄉 大武鄉 達仁鄉'.split(' '),
   '花蓮縣': '花蓮市 新城鄉 秀林鄉 吉安鄉 壽豐鄉 鳳林鎮 光復鄉 豐濱鄉 瑞穗鄉 萬榮鄉 玉里鎮 卓溪鄉 富里鄉'.split(' ')
 };
+
+// 這些縣市中心座標是手動選地區時的近似搜尋點；定位成功時優先用裝置座標。
+var TW_CITY_CENTERS = {
+  '臺北市': { lat: 25.0375, lng: 121.5637 },
+  '基隆市': { lat: 25.1276, lng: 121.7392 },
+  '新北市': { lat: 25.0117, lng: 121.4637 },
+  '宜蘭縣': { lat: 24.7570, lng: 121.7530 },
+  '連江縣': { lat: 26.1605, lng: 119.9490 },
+  '新竹市': { lat: 24.8039, lng: 120.9686 },
+  '新竹縣': { lat: 24.8390, lng: 121.0120 },
+  '桃園市': { lat: 24.9937, lng: 121.3010 },
+  '苗栗縣': { lat: 24.5602, lng: 120.8214 },
+  '臺中市': { lat: 24.1477, lng: 120.6736 },
+  '彰化縣': { lat: 24.0747, lng: 120.5437 },
+  '南投縣': { lat: 23.9157, lng: 120.6846 },
+  '嘉義市': { lat: 23.4801, lng: 120.4491 },
+  '嘉義縣': { lat: 23.4590, lng: 120.3320 },
+  '雲林縣': { lat: 23.7090, lng: 120.5430 },
+  '臺南市': { lat: 22.9900, lng: 120.2130 },
+  '高雄市': { lat: 22.6270, lng: 120.3010 },
+  '澎湖縣': { lat: 23.5710, lng: 119.5790 },
+  '金門縣': { lat: 24.4320, lng: 118.3180 },
+  '屏東縣': { lat: 22.6710, lng: 120.4880 },
+  '臺東縣': { lat: 22.7550, lng: 121.1450 },
+  '花蓮縣': { lat: 23.9910, lng: 121.6110 }
+};
+
+// 已知行政區中心點優先使用；其他行政區會退回縣市中心並在結果頁標示近似位置。
+var TW_AREA_CENTERS = {
+  '臺中市|西屯區': { lat: 24.1810, lng: 120.6460 }
+};
+
+// 前後端共用同一份分類設定，避免轉盤名稱和搜尋條件不一致。
+var CATEGORY_CONFIG_PROMISE = fetch('/data/categories.json').then(function (response) {
+  if (!response.ok) {
+    throw new Error('分類資料載入失敗。');
+  }
+  return response.json();
+}).then(function (categories) {
+  if (!Array.isArray(categories) || categories.length !== 20) {
+    throw new Error('分類資料格式不正確。');
+  }
+  return categories;
+});
+
+// 自動定位用精確座標；手動選擇則取行政區中心，沒有特定行政區資料時退回縣市中心。
+function getSelectedSearchLocation() {
+  var areaKey;
+  var center;
+
+  if (F.auto && Number.isFinite(F.lat) && Number.isFinite(F.lng)) {
+    return { lat: F.lat, lng: F.lng, approximate: false };
+  }
+  if (!F.city || !F.dist || !TW_CITY_CENTERS[F.city]) {
+    return null;
+  }
+
+  areaKey = F.city + '|' + F.dist;
+  center = TW_AREA_CENTERS[areaKey];
+  if (center) {
+    return { lat: center.lat, lng: center.lng, approximate: false };
+  }
+  center = TW_CITY_CENTERS[F.city];
+  return { lat: center.lat, lng: center.lng, approximate: true };
+}

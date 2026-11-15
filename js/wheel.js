@@ -1,34 +1,9 @@
 /* 這個檔案負責依照篩選條件整理料理類型、繪製轉盤與抽出結果。 */
-var WHEEL_CATALOG = [
-  { label: '台式', color: '#e83b2d', staples: ['rice', 'noodle', 'other'], vegetarian: true },
-  { label: '日式', color: '#2da160', staples: ['rice', 'noodle', 'other'], vegetarian: true },
-  { label: '韓式', color: '#7050a1', staples: ['rice', 'noodle', 'other'], vegetarian: true },
-  { label: '義式', color: '#f5b82e', staples: ['rice', 'noodle', 'other'], vegetarian: true },
-  { label: '美式', color: '#e83b2d', staples: ['other'], vegetarian: true },
-  { label: '泰式', color: '#2da160', staples: ['rice', 'noodle'], vegetarian: true },
-  { label: '越式', color: '#7050a1', staples: ['rice', 'noodle', 'other'] },
-  { label: '港式', color: '#f5b82e', staples: ['rice', 'noodle', 'other'], vegetarian: true },
-  { label: '火鍋', color: '#e83b2d', staples: ['rice', 'noodle', 'other'], vegetarian: true },
-  { label: '燒烤', color: '#2da160', staples: ['rice', 'other'], vegetarian: true },
-  { label: '速食', color: '#7050a1', staples: ['other'], vegetarian: true },
-  { label: '鹽酥雞', color: '#f5b82e', staples: ['other'], vegetarian: true },
-  { label: '滷味', color: '#e83b2d', staples: ['rice', 'noodle', 'other'], vegetarian: true },
-  { label: '健康餐', color: '#2da160', staples: ['rice', 'other'], vegetarian: true },
-  { label: '超商', color: '#7050a1', staples: ['rice', 'noodle', 'other'], vegetarian: true },
-  {
-    label: '蔬食料理',
-    color: '#f5b82e',
-    staples: ['rice', 'noodle', 'other'],
-    vegetarian: true,
-    meatOnly: true
-  },
-  { label: '中式', color: '#e83b2d', staples: ['rice', 'noodle', 'other'], vegetarian: true },
-  { label: '咖哩', color: '#2da160', staples: ['rice', 'noodle'], vegetarian: true },
-  { label: '早午餐', color: '#7050a1', staples: ['other'], vegetarian: true }
-];
+var WHEEL_CATALOG = [];
 var WHEEL_OPTIONS = [];
 var wheelRotation = 0;
 var wheelIsSpinning = false;
+var selectedWheelCategory = null;
 
 function getWheelOptions() {
   var options = [];
@@ -140,6 +115,7 @@ function finishSpin(index, button, graphic, result) {
   button.disabled = false;
   button.textContent = '不喜歡，重轉';
   result.textContent = '今天吃：' + option.label + '！';
+  selectedWheelCategory = option;
   graphic.setAttribute('aria-label', '抽中' + option.label);
   setHidden('wheel-result-actions', false);
   wheelIsSpinning = false;
@@ -213,5 +189,22 @@ $('#start-spin').addEventListener('click', function () {
 });
 
 $('#spin-again').addEventListener('click', spinWheel);
-WHEEL_OPTIONS = getWheelOptions();
-renderWheel();
+
+// 等共用分類檔載入後再建立轉盤，畫面和後端搜尋會使用同一份分類設定。
+CATEGORY_CONFIG_PROMISE.then(function (categories) {
+  WHEEL_CATALOG = categories.map(function (category) {
+    return {
+      label: category.name,
+      color: category.color,
+      staples: category.staples,
+      vegetarian: category.vegetarian,
+      meatOnly: category.meatOnly,
+      vegetarianOnly: category.vegetarianOnly
+    };
+  });
+  WHEEL_OPTIONS = getWheelOptions();
+  renderWheel();
+}).catch(function (error) {
+  console.error('無法載入料理分類。', error);
+  toast('料理分類載入失敗，請重新整理頁面。');
+});
