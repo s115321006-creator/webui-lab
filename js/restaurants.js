@@ -330,13 +330,14 @@ function runRestaurantSearch() {
   }
 
   vegOnly = F.meat === 'veg' || Boolean(category.vegetarianOnly);
-  options = {
-    category: category.label,
-    lat: location.lat,
-    lng: location.lng,
-    radius: F.rng,
-    vegOnly: vegOnly,
-    vegMode: vegOnly ? F.vegMode : 'include'
+  options = {    //冒號左邊是物件裡的欄位名稱，右邊是要放進去的值。
+                 //例如 category 是欄位名稱，category.label 是它的值。
+    category: category.label,  //要找哪一種料理。
+    lat: location.lat,         //搜尋中心點的緯度。
+    lng: location.lng,         //搜尋中心點的緯度。
+    radius: F.rng,             //搜尋半徑，單位是公尺。
+    vegOnly: vegOnly,          //是否只搜尋素食餐廳。
+    vegMode: vegOnly ? F.vegMode : 'include' //條件判斷式。若 vegOnly 是 true，就使用使用者選的 F.vegMode；否則使用 'include'，表示不套用額外的素食模式限制。
   };
   lastRestaurantSearch = options;
   alternateVegetarianSearch = null;

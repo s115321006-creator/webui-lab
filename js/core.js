@@ -30,7 +30,6 @@ S.cust = Array.isArray(S.cust) ? S.cust : [];
 S.custR = Array.isArray(S.custR) ? S.custR : [];
 S.fav = Array.isArray(S.fav) ? S.fav : [];
 S.bl = Array.isArray(S.bl) ? S.bl : [];
-var currentUser = null;
 
 function saveLocalState() {
   try {

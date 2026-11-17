@@ -262,9 +262,9 @@ function locateCurrentPosition() {
   setLocationButtonBusy(true);
   setLocationHelp('正在取得位置；取得後會將座標傳送至 OpenStreetMap Nominatim 查詢行政區。', false);
   navigator.geolocation.getCurrentPosition(function (position) {
-    var latitude = position.coords.latitude;
-    var longitude = position.coords.longitude;
-    var accuracy = position.coords.accuracy;
+    var latitude = position.coords.latitude; //latitude 是緯度
+    var longitude = position.coords.longitude; //longitude 是經度
+    var accuracy = position.coords.accuracy; //accuracy 是瀏覽器估算的位置誤差範圍
 
     F.lat = latitude;
     F.lng = longitude;

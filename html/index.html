@@ -11,34 +11,14 @@
 <body>
   <main class="app">
     <section class="scr home-screen on" id="home" aria-labelledby="home-title">
-      <div class="home-account-bar">
-        <div class="account-menu-wrap">
-          <button class="account-trigger hidden" id="account-trigger" type="button"
-            aria-label="開啟帳號選單" aria-expanded="false" aria-controls="account-menu"></button>
-          <div class="account-menu hidden" id="account-menu">
-            <p class="account-menu-user" id="account-menu-user"></p>
-            <button type="button" class="account-menu-item" id="account-menu-profile">
-              <span aria-hidden="true">●</span> 我的帳號
-            </button>
-            <button type="button" class="account-menu-item" id="logout-button">
-              <span aria-hidden="true">↪</span> 登出
-            </button>
-          </div>
-        </div>
-        <button class="login-entry" id="login-entry" type="button" data-go="login">登入</button>
-      </div>
-
       <header class="home-heading">
         <h1 id="home-title">今天吃什麼？</h1>
         <p>讓轉盤幫你決定。</p>
       </header>
 
-      <section class="account-panel" aria-label="Google 帳號">
-        <p class="guest-note" id="guest-note">
-          <span aria-hidden="true">💡</span>
-          收藏、黑名單與自製轉盤只儲存在這個瀏覽器；清除瀏覽資料後可能會遺失。
-        </p>
-      </section>
+      <p class="storage-note">
+        最愛、黑名單與自製轉盤資料儲存在目前瀏覽器；清除瀏覽資料後可能會遺失。
+      </p>
 
       <nav class="home-actions" aria-label="主要功能">
         <button class="button button-primary" type="button" data-go="filter">轉盤</button>
@@ -52,53 +32,6 @@
       </nav>
 
       <p class="demo-note">餐廳資料會透過後端向地圖服務查詢。</p>
-    </section>
-
-    <section class="scr login-screen" id="login" aria-labelledby="login-title">
-      <header class="screen-heading login-screen-heading">
-        <button class="back-button" type="button" data-go="home" aria-label="返回首頁">←</button>
-        <span class="login-back-label">返回</span>
-      </header>
-      <div class="login-card">
-        <h1 id="login-title">歡迎回來</h1>
-        <p class="login-intro" id="login-intro">登入 Google 帳號；使用者資料只保存在這台裝置。</p>
-
-        <div class="auth-tabs" role="tablist" aria-label="登入或註冊">
-          <button class="auth-tab is-active" id="login-tab" type="button" role="tab"
-            aria-selected="true" aria-controls="email-auth-form" data-auth-mode="login">登入</button>
-          <button class="auth-tab" id="register-tab" type="button" role="tab"
-            aria-selected="false" aria-controls="email-auth-form" data-auth-mode="register">註冊</button>
-        </div>
-
-        <form class="email-auth-form" id="email-auth-form">
-          <label for="auth-email">Email</label>
-          <input id="auth-email" name="email" type="email" autocomplete="email"
-            placeholder="name@example.com">
-          <label for="auth-password">密碼</label>
-          <div class="password-field">
-            <input id="auth-password" name="password" type="password"
-              autocomplete="current-password" placeholder="••••••••">
-            <button class="password-toggle" id="password-toggle" type="button"
-              aria-label="顯示密碼">顯示</button>
-          </div>
-          <button class="forgot-password" id="forgot-password" type="button">
-            忘記密碼？
-          </button>
-          <button class="button button-primary email-submit" id="email-auth-submit" type="submit">
-            登入
-          </button>
-        </form>
-
-        <p class="auth-unavailable">
-          Email／密碼登入尚未開放，目前請使用 Google 登入。
-        </p>
-        <div class="auth-divider"><span>或</span></div>
-        <div class="google-signin-wrap" id="google-signin-button"></div>
-        <button class="button button-outline guest-button" id="guest-button" type="button">
-          以訪客身分繼續
-        </button>
-        <p class="guest-login-note">訪客資料只會保存在這台裝置。</p>
-      </div>
     </section>
 
     <section class="scr filter-screen" id="filter" aria-labelledby="filter-title">
@@ -403,6 +336,5 @@
   <script src="js/restaurants.js"></script>
   <script src="js/custom.js"></script>
   <script src="js/lists.js"></script>
-  <script src="js/auth.js"></script>
 </body>
 </html>

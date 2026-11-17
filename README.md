@@ -5,12 +5,10 @@ Web Programming 課程實作專案。
 ## 本機啟動
 
 1. 安裝 Python 依賴：`python -m pip install -r requirements.txt`
-2. 複製 `.env.example` 為 `.env`，填入 Google OAuth 2.0「網頁應用程式」的 Client ID，以及 Google Places API Key。`PLACES_PROVIDER` 設為 `google` 或 `osm`，切換餐廳資料來源。
-3. 在 Google Cloud OAuth 用戶端的「已授權的 JavaScript 來源」加入 `http://127.0.0.1:7777`。
+2. 複製 `.env.example` 為 `.env`，填入 Google Places API Key。`PLACES_PROVIDER` 設為 `google` 或 `osm`，切換餐廳資料來源。
+3. 若使用 Google Places，請在 Google Cloud Console 啟用 Places API (New)，並設定 API Key 的使用限制。
 4. 啟動服務：`python -m uvicorn server:app --host 127.0.0.1 --port 7777 --reload`
 5. 瀏覽 `http://127.0.0.1:7777/`。
-
-Google 登入使用 Google Identity Services，不需要在前端或 `.env` 放置 Client Secret。正式環境必須使用 HTTPS，並設定 `COOKIE_SECURE=true`；同時將正式網站來源加入 Google OAuth 用戶端設定。
 
 餐廳搜尋由瀏覽器呼叫本站 `/api/restaurants`，再由後端依 `PLACES_PROVIDER` 查詢 Google Places API (New) 或 OpenStreetMap Overpass。Google Places API Key 只能設定在後端 `.env`，不可放進前端檔案。
 
@@ -18,9 +16,7 @@ Google 登入使用 Google Identity Services，不需要在前端或 `.env` 放�
 
 自動定位會使用裝置座標；手動選擇行政區時，若該區沒有獨立中心座標，搜尋會以縣市中心近似並在結果頁提示。
 
-## 使用者資料
-
-最愛、黑名單與自訂轉盤資料一律儲存在目前瀏覽器的 `localStorage`，登入 Google 不會同步資料；登出後本機資料仍會保留。清除瀏覽器網站資料或改用其他裝置、瀏覽器時，這些資料可能會遺失。
+最愛、黑名單與自訂轉盤資料儲存在目前瀏覽器的 `localStorage`；清除瀏覽資料或更換瀏覽器、裝置時不會同步。
 
 ## 學號
 
